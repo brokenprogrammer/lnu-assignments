@@ -9,8 +9,8 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 /**
- * UDPEchoClient extending the EchoClient that connects to remote through
- * specified arguments in the form of:
+ * UDPEchoClient extending the EchoClient that connects to remote using a 
+ * UDP through specified arguments in the form of:
  * 	[IP] [PORT] [BUFFER LENGTH] [TRANSFER RATE]
  * 
  * Where transfer rate is the number of messages per second.
@@ -19,7 +19,7 @@ import java.net.SocketException;
  * @version 00.00.00
  * @name UDPEchoClient.java
  */
-public class UDPEchoClient extends EchoClient{
+public class UDPEchoClient extends EchoClient {
 
     public static final String MSG= "An Echo Message!";
     DatagramSocket socket;
@@ -42,7 +42,7 @@ public class UDPEchoClient extends EchoClient{
 		receivePacket= new DatagramPacket(buffer, buffer.length);
 		
 		// Run echoing to the server for 1 second.
-		super.runSecond(new Thread(this));
+		runSecond(new Thread(this));
 		
 		socket.close();
 	}

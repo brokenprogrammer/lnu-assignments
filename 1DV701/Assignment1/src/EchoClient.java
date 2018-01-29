@@ -22,7 +22,7 @@ public abstract class EchoClient implements Runnable {
 	
 	protected String IP;						// IP address to connect to
 	protected int port = 4950;					// Port to connect to
-	protected int bufSize = 1024;				// Buffer size, 1024 is standard.
+	protected int bufferSize = 1024;			// Buffer size, 1024 is standard.
 	protected int transferRate;					// Messages per second.
 	protected byte[] buffer;					// Buffer for holding incoming datagram.
 	protected SocketAddress localBindPoint;		// Local endpoint
@@ -70,8 +70,8 @@ public abstract class EchoClient implements Runnable {
 			System.err.println("Invalid buffer size.");
 			System.exit(1);
 		} else {
-			this.bufSize = Integer.parseInt(args[2]);
-			this.buffer = new byte[bufSize];
+			this.bufferSize = Integer.parseInt(args[2]);
+			this.buffer = new byte[bufferSize];
 		}
 		
 		if (!isValidTransferRate(Integer.parseInt(args[3]))) {
