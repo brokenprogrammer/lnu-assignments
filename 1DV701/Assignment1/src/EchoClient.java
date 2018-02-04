@@ -117,7 +117,7 @@ public abstract class EchoClient implements Runnable {
 	 * @return True if valid; false otherwise.
 	 */
 	private boolean isValidBufferSize(int bufferSize) {
-		return bufferSize > 1 ? true : false;
+		return bufferSize > 0 ? true : false;
 	}
 	
 	/**

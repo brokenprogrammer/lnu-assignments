@@ -71,6 +71,7 @@ public class TCPEchoClient extends EchoClient {
 	@Override
 	protected void performSendAndRecieve() {
 		try {
+			System.out.println("BUFFSIZE: " + this.bufferSize);
 			// Send the message to the output stream.
 			outputStream.write(MSG.getBytes());
 
