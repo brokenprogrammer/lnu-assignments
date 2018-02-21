@@ -122,9 +122,13 @@ class ServerClient implements Runnable {
 			case "GET":
 			{
 				Map<Header, HTTPHeader> httpHeaders = HTTPHeader.parseHeaders(lines);
-				// Doesnt find "Accept Header"...
+				// Doesnt find "Accept Header"...	
 			} break;
 		}
+		
+	}
+	
+	private void writeResponse() {
 		
 	}
 	
