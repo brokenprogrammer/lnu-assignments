@@ -7,6 +7,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
+
+import com.mywebserver.request.HTTPHeader;
+import com.mywebserver.request.HTTPHeader.Header;
 
 /**
  * TCPEchoServer that listens to incoming connections through TCP and 
@@ -113,10 +117,12 @@ class ServerClient implements Runnable {
 			throw new Exception("Invalid Request Type.");
 		}
 		
+		
 		switch(type) {
 			case "GET":
 			{
-				// Get HTTP Headers..
+				Map<Header, HTTPHeader> httpHeaders = HTTPHeader.parseHeaders(lines);
+				// Doesnt find "Accept Header"...
 			} break;
 		}
 		
