@@ -30,7 +30,7 @@ import com.mywebserver.request.HTTPRequest;
 public class TCPEchoServer {
     public static final int MYPORT= 8080;
     public static int userNumber = 1;
-    public static final String SHAREDFOLDER = ""; // Project root.
+    public static final String SHAREDFOLDER = "shared"; // Project root.
     
     public static void main(String[] args) throws IOException {
     	// Create server socket.
@@ -143,17 +143,12 @@ class ServerClient implements Runnable {
 	private HTTPResponse getResponse(HTTPRequest request) {
 		switch (request.getType()) {
 		case "GET":
-<<<<<<< HEAD
 			try {
 				File file = translateURL(request.getUrl());
 				return new HTTP200OKResponse(file);
 			} catch (Exception e) {
 				
 			}
-=======
-			File file = new File("shared/dir1/htmlfiles/index.html"); //TODO More robust.. if '/' remove it.. 
-			return new HTTP200OKResponse(file);
->>>>>>> master
 		}
 		
 		return new HTTP200OKResponse(null);
@@ -168,10 +163,14 @@ class ServerClient implements Runnable {
 		}
 		
 		File shared = new File(TCPEchoServer.SHAREDFOLDER);
-//		System.out.println("URL: " + TCPEchoServer.SHAREDFOLDER + url);
-//		System.out.println("ABS: " + shared.getAbsolutePath() + " " + url);
+		System.out.println("URL: " + TCPEchoServer.SHAREDFOLDER + url);
+		System.out.println("ABS: " + shared.getAbsolutePath() + " " + url);
 		
 		File file = new File(shared.getAbsolutePath() + url);
+		
+		if (file.isDirectory()) {
+			file = new File(file.getAbsolutePath() + "/index.html");
+		}
 		
 		if (file.exists()) {
 			return file;
