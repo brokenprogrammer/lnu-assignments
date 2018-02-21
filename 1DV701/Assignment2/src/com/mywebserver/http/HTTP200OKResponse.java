@@ -26,11 +26,11 @@ public class HTTP200OKResponse extends HTTPResponse{
 		String end = parts[parts.length - 1];
 		
 		if(end.equals("html") || end.equals("htm")){
-			end = "texthtml";
+			end = "text/html";
 		} else if(end.equals("png")){
-			end = "imagepng";
+			end = "image/png";
 		} else{
-			end = "applicationunknown";
+			end = "application/unknown";
 		}
 		
 		res += "Content-Type: " + end + "\r\n";
