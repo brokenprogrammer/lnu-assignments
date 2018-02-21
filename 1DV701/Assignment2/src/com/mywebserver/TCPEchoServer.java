@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -29,13 +30,14 @@ import com.mywebserver.request.HTTPRequest;
 public class TCPEchoServer {
     public static final int MYPORT= 8080;
     public static int userNumber = 1;
+    public static final String SHAREDFOLDER = ""; // Project root.
     
     public static void main(String[] args) throws IOException {
     	// Create server socket.
     	ServerSocket serverSocket = new ServerSocket(MYPORT);
     	
     	System.out.println("Server has been started and is now running..");
-    	System.out.println(new File("" + "test/").getAbsolutePath());
+    	
     	// Start listening for incoming connections.
     	while (true) {
     		// If connection was found then accept it.
@@ -53,7 +55,6 @@ public class TCPEchoServer {
 class ServerClient implements Runnable {
 	public static final int BUFFERSIZE= 1024;
 	private byte[] buffer;
-	
 	private Socket socket;
 	private int userNumber;
 	private DataInputStream inputStream;
@@ -142,11 +143,36 @@ class ServerClient implements Runnable {
 	private HTTPResponse getResponse(HTTPRequest request) {
 		switch (request.getType()) {
 		case "GET":
-			File file = new File("index.html"); //TODO More robust.. if '/' remove it.. 
-			return new HTTP200OKResponse(file);
+			try {
+				File file = translateURL(request.getUrl());
+				return new HTTP200OKResponse(file);
+			} catch (Exception e) {
+				
+			}
 		}
 		
 		return new HTTP200OKResponse(null);
+	}
+	
+	private File translateURL(String sharedPath) throws FileNotFoundException {
+		String url = sharedPath;
+		
+		
+		if (url.endsWith("/") || url.endsWith("\\")) {
+			url += "index.html";
+		}
+		
+		File shared = new File(TCPEchoServer.SHAREDFOLDER);
+//		System.out.println("URL: " + TCPEchoServer.SHAREDFOLDER + url);
+//		System.out.println("ABS: " + shared.getAbsolutePath() + " " + url);
+		
+		File file = new File(shared.getAbsolutePath() + url);
+		
+		if (file.exists()) {
+			return file;
+		}
+		
+		throw new FileNotFoundException();
 	}
 	
 	private void writeResponse(HTTPResponse response) throws IOException {
