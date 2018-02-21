@@ -14,6 +14,8 @@ import java.net.Socket;
 import java.util.Map;
 
 import com.mywebserver.http.HTTP200OKResponse;
+import com.mywebserver.http.HTTP404FileNotFoundResponse;
+import com.mywebserver.http.HTTP500InternalServerErrorResponse;
 import com.mywebserver.http.HTTPResponse;
 import com.mywebserver.request.HTTPHeader;
 import com.mywebserver.request.HTTPHeader.Header;
@@ -184,13 +186,15 @@ class ServerClient implements Runnable {
 		PrintWriter pw = new PrintWriter(this.outputStream, true);
 		pw.write(str);
 		pw.flush();
-		FileInputStream in = new FileInputStream(response.getFile());
-		OutputStream out = this.outputStream;
-		int count = 0;
-		while((count = in.read(buffer)) != -1){
-			out.write(buffer, 0, count);
+		if(response instanceof HTTP200OKResponse){
+			FileInputStream in = new FileInputStream(response.getFile());
+			OutputStream out = this.outputStream;
+			int count = 0;
+			while((count = in.read(buffer)) != -1){
+				out.write(buffer, 0, count);
+			}
+			in.close();
 		}
-		in.close();
 	}
 	
 	@Override
