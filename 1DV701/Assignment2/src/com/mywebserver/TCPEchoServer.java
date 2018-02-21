@@ -2,13 +2,17 @@ package com.mywebserver;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
+import com.mywebserver.http.HTTPResponse;
 import com.mywebserver.request.HTTPHeader;
 import com.mywebserver.request.HTTPHeader.Header;
 
@@ -46,6 +50,7 @@ public class TCPEchoServer {
 
 class ServerClient implements Runnable {
 	public static final int BUFFERSIZE= 1024;
+	private byte[] buffer;
 	
 	private Socket socket;
 	private int userNumber;
@@ -62,6 +67,7 @@ class ServerClient implements Runnable {
 	public ServerClient(Socket socket, int userNumber) {
 		this.socket = socket;
 		this.userNumber = userNumber;
+		this.buffer = new byte[BUFFERSIZE];
 		
 		try {
 			// Initialize input and output streams.
@@ -128,8 +134,18 @@ class ServerClient implements Runnable {
 		
 	}
 	
-	private void writeResponse() {
-		
+	private void writeResponse(HTTPResponse response) throws IOException {
+		String str = response.getResponse();
+		PrintWriter pw = new PrintWriter(this.outputStream, true);
+		pw.write(str);
+		pw.flush();
+		FileInputStream in = new FileInputStream(response.getFile());
+		OutputStream out = this.outputStream;
+		int count = 0;
+		while((count = in.read(buffer)) != -1){
+			out.write(buffer, 0, count);
+		}
+		in.close();
 	}
 	
 	@Override

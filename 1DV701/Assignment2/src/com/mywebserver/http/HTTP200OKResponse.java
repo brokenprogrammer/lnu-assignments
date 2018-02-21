@@ -4,8 +4,6 @@ import java.io.File;
 
 public class HTTP200OKResponse extends HTTPResponse{
 	
-	private File file;
-	
 	public HTTP200OKResponse(File file){
 		this.file = file;
 		if(this.file.isDirectory()){
