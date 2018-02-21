@@ -143,12 +143,17 @@ class ServerClient implements Runnable {
 	private HTTPResponse getResponse(HTTPRequest request) {
 		switch (request.getType()) {
 		case "GET":
+<<<<<<< HEAD
 			try {
 				File file = translateURL(request.getUrl());
 				return new HTTP200OKResponse(file);
 			} catch (Exception e) {
 				
 			}
+=======
+			File file = new File("shared/dir1/htmlfiles/index.html"); //TODO More robust.. if '/' remove it.. 
+			return new HTTP200OKResponse(file);
+>>>>>>> master
 		}
 		
 		return new HTTP200OKResponse(null);
