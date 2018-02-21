@@ -142,7 +142,7 @@ class ServerClient implements Runnable {
 	private HTTPResponse getResponse(HTTPRequest request) {
 		switch (request.getType()) {
 		case "GET":
-			File file = new File("index.html"); //TODO More robust.. if '/' remove it.. 
+			File file = new File("shared/dir1/htmlfiles/index.html"); //TODO More robust.. if '/' remove it.. 
 			return new HTTP200OKResponse(file);
 		}
 		
