@@ -13,7 +13,7 @@ import java.net.Socket;
  * @name TCPEchoServer.java
  */
 public class TCPEchoServer {
-    public static final int MYPORT= 4950;
+    public static final int MYPORT= 8080;
     public static int userNumber = 1;
     
     public static void main(String[] args) throws IOException {
@@ -74,21 +74,24 @@ class ServerClient implements Runnable {
 			
 			// While there is bytes to read in the input stream we read them into
 			// buffer and echo it back to client.
-			while ((bytesRead = inputStream.read(buffer)) != -1) {
-				receivedString = new String(buffer).trim();
-				
-				if (!receivedString.isEmpty()) {
-					// Echo the message back to the client.
-					outputStream.write(receivedString.getBytes());
-
-					// Print status message.
-					System.out.println("User: " + this.userNumber + ", IP: " + socket.getInetAddress() + 
-							", PORT: " + socket.getPort() + ", Recieved and sent " + receivedString.length() + " bytes");
-				}
-				
-				// Reset buffer.
-				buffer = new byte[BUFFERSIZE];
-			}
+//			while ((bytesRead = inputStream.read(buffer)) != -1) {
+//				receivedString = new String(buffer).trim();
+//				
+//				if (!receivedString.isEmpty()) {
+//					// Echo the message back to the client.
+//					outputStream.write(receivedString.getBytes());
+//
+//					// Print status message.
+//					System.out.println("User: " + this.userNumber + ", IP: " + socket.getInetAddress() + 
+//							", PORT: " + socket.getPort() + ", Recieved and sent " + receivedString.length() + " bytes");
+//				}
+//				
+//				// Reset buffer.
+//				buffer = new byte[BUFFERSIZE];
+//			}
+			
+			outputStream.write(new String("HTTP/1.1 200 OK\r\n\r\nHello world").getBytes());
+			//outputStream.write(new String("Hej Testing").getBytes());
 			
 			// Close the socket when done.
 			try {
