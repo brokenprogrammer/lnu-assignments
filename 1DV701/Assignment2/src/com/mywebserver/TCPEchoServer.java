@@ -2,9 +2,8 @@ package com.mywebserver;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -12,9 +11,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
+import com.mywebserver.http.HTTP200OKResponse;
 import com.mywebserver.http.HTTPResponse;
 import com.mywebserver.request.HTTPHeader;
 import com.mywebserver.request.HTTPHeader.Header;
+import com.mywebserver.request.HTTPRequest;
 
 /**
  * TCPEchoServer that listens to incoming connections through TCP and 
@@ -33,7 +34,7 @@ public class TCPEchoServer {
     	ServerSocket serverSocket = new ServerSocket(MYPORT);
     	
     	System.out.println("Server has been started and is now running..");
-    	
+    	System.out.println(new File("" + "test/").getAbsolutePath());
     	// Start listening for incoming connections.
     	while (true) {
     		// If connection was found then accept it.
@@ -113,7 +114,7 @@ class ServerClient implements Runnable {
 		return request;
 	}
 	
-	private void parseRequest(String request) throws Exception {
+	private HTTPRequest parseRequest(String request) throws Exception {
 		
 		String[] lines = request.split("\r\n");
 		String first = lines[0];
@@ -128,10 +129,23 @@ class ServerClient implements Runnable {
 			case "GET":
 			{
 				Map<Header, HTTPHeader> httpHeaders = HTTPHeader.parseHeaders(lines);
-				// Doesnt find "Accept Header"...	
-			} break;
+				// Doesnt find "Accept Header"...	//TODO: Bug.
+
+				return new HTTPRequest("GET", first.split(" ")[1], httpHeaders);
+			}
 		}
 		
+		return null;
+	}
+	
+	private HTTPResponse getResponse(HTTPRequest request) {
+		switch (request.getType()) {
+		case "GET":
+			File file = new File("" + request.getUrl()); //TODO More robust.. if '/' remove it.. 
+			return new HTTP200OKResponse(file);
+		}
+		
+		return new HTTP200OKResponse(null);
 	}
 	
 	private void writeResponse(HTTPResponse response) throws IOException {
@@ -156,28 +170,9 @@ class ServerClient implements Runnable {
 			int bytesRead = 0;
 			
 			String request = getRequest();
-			parseRequest(request);
-			// While there is bytes to read in the input stream we read them into
-			// buffer and echo it back to client.
-//			while ((bytesRead = inputStream.read(buffer)) != -1) {
-//				receivedString = new String(buffer).trim();
-//				
-//				if (!receivedString.isEmpty()) {
-//					// Echo the message back to the client.
-//					outputStream.write(receivedString.getBytes());
-//
-//					// Print status message.
-//					System.out.println("User: " + this.userNumber + ", IP: " + socket.getInetAddress() + 
-//							", PORT: " + socket.getPort() + ", Recieved and sent " + receivedString.length() + " bytes");
-//				}
-//				
-//				// Reset buffer.
-//				buffer = new byte[BUFFERSIZE];
-//			}
+			HTTPRequest httpRequest = parseRequest(request);
 			
 			
-			//outputStream.write(new String("HTTP/1.1 200 OK\r\n\r\nHello world").getBytes());
-			outputStream.write(request.getBytes());
 			
 			// Close the socket when done.
 			try {
