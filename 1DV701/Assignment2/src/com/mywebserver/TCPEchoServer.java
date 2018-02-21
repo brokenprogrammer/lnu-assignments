@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -141,7 +142,7 @@ class ServerClient implements Runnable {
 	private HTTPResponse getResponse(HTTPRequest request) {
 		switch (request.getType()) {
 		case "GET":
-			File file = new File("" + request.getUrl()); //TODO More robust.. if '/' remove it.. 
+			File file = new File("index.html"); //TODO More robust.. if '/' remove it.. 
 			return new HTTP200OKResponse(file);
 		}
 		
@@ -172,7 +173,8 @@ class ServerClient implements Runnable {
 			String request = getRequest();
 			HTTPRequest httpRequest = parseRequest(request);
 			
-			
+			HTTPResponse httpResponse = getResponse(httpRequest);
+			writeResponse(httpResponse);
 			
 			// Close the socket when done.
 			try {

@@ -18,7 +18,7 @@ public class HTTP200OKResponse extends HTTPResponse{
 	
 	@Override
 	public String getResponse(){
-		String res = "HTTP/1.1 200 OK\r\n\r\n";
+		String res = "HTTP/1.1 200 OK\r\n";
 		String path = file.getName();
 		String[] parts = path.split("\\.");
 		String end = parts[parts.length - 1];
@@ -33,6 +33,7 @@ public class HTTP200OKResponse extends HTTPResponse{
 		
 		res += "Content-Type: " + end + "\r\n";
 		res += "Content-Length: " + file.length() + "\r\n";	
+		res += "\r\n";
 		return res;
 	}
 }
