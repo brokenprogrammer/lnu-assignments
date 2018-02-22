@@ -14,6 +14,8 @@ import java.net.Socket;
 import java.util.Map;
 
 import com.mywebserver.http.HTTP200OKResponse;
+import com.mywebserver.http.HTTP302FoundResponse;
+import com.mywebserver.http.HTTP403ForbiddenResponse;
 import com.mywebserver.http.HTTP404FileNotFoundResponse;
 import com.mywebserver.http.HTTP500InternalServerErrorResponse;
 import com.mywebserver.http.HTTPResponse;
@@ -194,6 +196,9 @@ class ServerClient implements Runnable {
 				out.write(buffer, 0, count);
 			}
 			in.close();
+		} else {
+			pw.write(response.getContent());
+			pw.flush();
 		}
 	}
 	
