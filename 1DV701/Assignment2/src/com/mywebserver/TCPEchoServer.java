@@ -148,17 +148,24 @@ class ServerClient implements Runnable {
 		switch (request.getType()) {
 		case "GET":
 			try {
+				if (request.getUrl().contains("/workinprogress")) {
+					return new HTTP302FoundResponse("/");
+				}
 				File file = translateURL(request.getUrl());
 				return new HTTP200OKResponse(file);
-			} catch (Exception e) {
-				
+			} catch (FileNotFoundException e) {
+				return new HTTP404FileNotFoundResponse();
+			} catch (SecurityException e) {
+				return new HTTP403ForbiddenResponse();
+			} catch (IOException e) {
+				return new HTTP500InternalServerErrorResponse();
 			}
 		}
 		
-		return new HTTP200OKResponse(null);
+		return new HTTP500InternalServerErrorResponse();
 	}
 	
-	private File translateURL(String sharedPath) throws FileNotFoundException {
+	private File translateURL(String sharedPath) throws IOException {
 		String url = sharedPath;
 		
 		
@@ -167,13 +174,16 @@ class ServerClient implements Runnable {
 		}
 		
 		File shared = new File(TCPEchoServer.SHAREDFOLDER);
-		System.out.println("URL: " + TCPEchoServer.SHAREDFOLDER + url);
-		System.out.println("ABS: " + shared.getAbsolutePath() + " " + url);
-		
 		File file = new File(shared.getAbsolutePath() + url);
 		
 		if (file.isDirectory()) {
 			file = new File(file.getAbsolutePath() + "/index.html");
+		}
+		
+		// If user tries to access non-shared folder
+		String filePath = file.getCanonicalPath();
+		if (!filePath.substring(0, shared.getAbsolutePath().length()).equals(shared.getAbsolutePath())) {
+			throw new SecurityException();
 		}
 		
 		if (file.exists()) {
