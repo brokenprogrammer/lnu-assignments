@@ -6,9 +6,9 @@ public class HTTPRequest {
 	
 	private String type;
 	private String url;
-	private Map<HTTPHeader.Header, HTTPHeader> headers;
+	private Map<Header, HTTPHeader> headers;
 	
-	public HTTPRequest(String type, String url, Map<HTTPHeader.Header, HTTPHeader> headers) {
+	public HTTPRequest(String type, String url, Map<Header, HTTPHeader> headers) {
 		this.type = type;
 		this.url = url;
 		this.headers = headers;

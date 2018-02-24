@@ -20,7 +20,7 @@ import com.mywebserver.http.HTTP404FileNotFoundResponse;
 import com.mywebserver.http.HTTP500InternalServerErrorResponse;
 import com.mywebserver.http.HTTPResponse;
 import com.mywebserver.request.HTTPHeader;
-import com.mywebserver.request.HTTPHeader.Header;
+import com.mywebserver.request.Header;
 import com.mywebserver.request.HTTPRequest;
 
 /**
@@ -86,12 +86,22 @@ class ServerClient implements Runnable {
 		
 	}
 	
+	/**
+	 * Reads the socket's InputStream to retrieve a string version of the HTTP request
+	 * that was sent to the server.
+	 * 
+	 * @return - String with the content of the HTTP request that was sent to the server.
+	 * 
+	 * @throws IOException - If unexpectedly reaching EOF when reading the HTTP request.
+	 */
 	private String getRequest() throws IOException {
-		BufferedReader in = new BufferedReader(new InputStreamReader((this.socket.getInputStream())));	
+		// DataInputStream is deprecated for this task so buffered reader is used instead.
+		BufferedReader in = new BufferedReader(new InputStreamReader((this.socket.getInputStream())));
 		
-		// Read all in the input buffer..
+		// Read everything in the inputstream.
 		StringBuilder content = new StringBuilder();
 		int contentLength = 0;
+		
 		while(true) {
 			String line = in.readLine();
 			
@@ -105,63 +115,94 @@ class ServerClient implements Runnable {
 				break;
 			}
 			
+			// Parse the Content Length value if the current read header is the content length.
 			if (line.startsWith("Content-Length:")) {
 				String number = line.substring(16);
 				contentLength = Integer.parseInt(number); 
 			}
 		}
 		
+		// Parse the rest of the content in the request based on the content length.
 		for (int i = 0; i < contentLength; i++) {
 			content.append((char)in.read());
 		}
 		
-		String request = content.toString();
-		
-		return request;
+		return content.toString();
 	}
 	
+	/**
+	 * Parses a a HTTPRequest from a String into a HTTPRequest object. Also parses all the headers
+	 * and stores them together with the request type within the HTTPRequest object.
+	 * 
+	 * @param request - String of read request made to the server.
+	 * 
+	 * @return - A HTTPRequest object created through parsing the contents of the HTTP request string.
+	 * 
+	 * @throws Exception - If the format of the String doesn't match a valid HTTP request.
+	 */
 	private HTTPRequest parseRequest(String request) throws Exception {
 		
 		String[] lines = request.split("\r\n");
 		String first = lines[0];
 		
+		// First line contains the request type and path, a format of length 3. If this doesn't match
+		// then its not a valid request String.
 		String type = first.split(" ").length == 3 ? first.split(" ")[0] : null;
 		if (type == null) {
 			throw new Exception("Invalid Request Type.");
 		}
 		
-		
+		// Switch over the request type.
 		switch(type) {
 			case "GET":
 			{
-				Map<Header, HTTPHeader> httpHeaders = HTTPHeader.parseHeaders(lines);
 				// Doesnt find "Accept Header"...	//TODO: Bug.
-
+				Map<Header, HTTPHeader> httpHeaders = HTTPHeader.parseHeaders(lines);
 				return new HTTPRequest("GET", first.split(" ")[1], httpHeaders);
 			}
 		}
 		
+		// No valid request type was found.
 		return null;
 	}
 	
+	/**
+	 * Evaluates a HTTPRequest and constructs and returns a HTTPResponse based on the 
+	 * evaluation of the HTTPRequest.
+	 * 
+	 * @param request - HTTPRequest to evaluate.
+	 * 
+	 * @return - HTTPResponse based on the evaluation of the HTTPRequest.
+	 */
 	private HTTPResponse getResponse(HTTPRequest request) {
 		switch (request.getType()) {
-		case "GET":
-			try {
-				if (request.getUrl().contains("/workinprogress")) {
-					return new HTTP302FoundResponse("/");
+			case "GET":
+			{
+				try {
+					// If the request URL is pointing to a directory set to be redirected to another URL
+					// or HTTP code 302.
+					if (request.getUrl().contains("/workinprogress")) {
+						return new HTTP302FoundResponse("/");
+					}
+					
+					// Read the file located at the URL of the HTTPRequest.
+					File file = translateURL(request.getUrl());
+					return new HTTP200OKResponse(file);
+					
+				} catch (FileNotFoundException e) {
+					// If no such file was found a HTTP response of code 404 is sent back.
+					return new HTTP404FileNotFoundResponse();
+				} catch (SecurityException e) {
+					// If the file or directory is protected a HTTP response of code 403 is sent back.
+					return new HTTP403ForbiddenResponse();
+				} catch (IOException e) {
+					// If any errors have occurred by the server then a HTTP response of code 500 is sent back.
+					return new HTTP500InternalServerErrorResponse();
 				}
-				File file = translateURL(request.getUrl());
-				return new HTTP200OKResponse(file);
-			} catch (FileNotFoundException e) {
-				return new HTTP404FileNotFoundResponse();
-			} catch (SecurityException e) {
-				return new HTTP403ForbiddenResponse();
-			} catch (IOException e) {
-				return new HTTP500InternalServerErrorResponse();
 			}
 		}
 		
+		// If a request of a type that is not implemented a HTTP response of code 500 is sent back.
 		return new HTTP500InternalServerErrorResponse();
 	}
 	
@@ -219,10 +260,16 @@ class ServerClient implements Runnable {
 			byte[] buffer = new byte[BUFFERSIZE];
 			int bytesRead = 0;
 			
+			// Retrieve HTTP request sent to the server.
 			String request = getRequest();
+			
+			// Initialize a HTTPRequest object using the read HTTP response.
 			HTTPRequest httpRequest = parseRequest(request);
 			
+			// Uses the HTTPRequest object to determine what type of HTTPResponse to send back to the client.
 			HTTPResponse httpResponse = getResponse(httpRequest);
+			
+			// Write the HTTPResponse back to the client.
 			writeResponse(httpResponse);
 			
 			// Close the socket when done.
