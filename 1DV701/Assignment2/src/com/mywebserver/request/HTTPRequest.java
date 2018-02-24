@@ -2,6 +2,14 @@ package com.mywebserver.request;
 
 import java.util.Map;
 
+/**
+ * HTTPRequest object containing a the request type, url and the Headers sent with the
+ * request.
+ * 
+ * @author Oskar
+ * @version 00.00.00
+ * @name HTTPRequest.java
+ */
 public class HTTPRequest {
 	
 	private String type;
@@ -12,8 +20,6 @@ public class HTTPRequest {
 		this.type = type;
 		this.url = url;
 		this.headers = headers;
-		
-		//TODO Validate that headers contains "Host".
 	}
 	
 	public String getType() {
@@ -22,5 +28,9 @@ public class HTTPRequest {
 	
 	public String getUrl() {
 		return this.url;
+	}
+	
+	public Map<Header, HTTPHeader> getHeaders() {
+		return this.headers;
 	}
 }

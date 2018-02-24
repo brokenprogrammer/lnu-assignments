@@ -156,7 +156,6 @@ class ServerClient implements Runnable {
 		switch(type) {
 			case "GET":
 			{
-				// Doesnt find "Accept Header"...	//TODO: Bug.
 				Map<Header, HTTPHeader> httpHeaders = HTTPHeader.parseHeaders(lines);
 				return new HTTPRequest("GET", first.split(" ")[1], httpHeaders);
 			}
@@ -206,10 +205,16 @@ class ServerClient implements Runnable {
 		return new HTTP500InternalServerErrorResponse();
 	}
 	
-	private File translateURL(String sharedPath) throws IOException {
-		String url = sharedPath;
-		
-		
+	/**
+	 * Translates an URL to a valid file. 
+	 * 
+	 * @param url - Target URL to retrieve file from.
+	 * 
+	 * @return - File at given URL from the shared path or error if the file doesn't exist or is protected.
+	 * 
+	 * @throws IOException
+	 */
+	private File translateURL(String url) throws IOException {
 		if (url.endsWith("/") || url.endsWith("\\")) {
 			url += "index.html";
 		}
@@ -217,6 +222,7 @@ class ServerClient implements Runnable {
 		File shared = new File(TCPEchoServer.SHAREDFOLDER);
 		File file = new File(shared.getAbsolutePath() + url);
 		
+		// Search for the index.html if the user only specified an URL to a directory.
 		if (file.isDirectory()) {
 			file = new File(file.getAbsolutePath() + "/index.html");
 		}
@@ -227,13 +233,22 @@ class ServerClient implements Runnable {
 			throw new SecurityException();
 		}
 		
+		// If the file exist simply return the file.
 		if (file.exists()) {
 			return file;
 		}
 		
+		// If the file was not found.
 		throw new FileNotFoundException();
 	}
 	
+	/**
+	 * Writes a response back to the client based on a HTTPResponse object.
+	 * 
+	 * @param response - HTTPResponse object to write to the client.
+	 * 
+	 * @throws IOException
+	 */
 	private void writeResponse(HTTPResponse response) throws IOException {
 		String str = response.getResponse();
 		PrintWriter pw = new PrintWriter(this.outputStream, true);
@@ -259,18 +274,26 @@ class ServerClient implements Runnable {
 			String receivedString = "";
 			byte[] buffer = new byte[BUFFERSIZE];
 			int bytesRead = 0;
+			String request;
 			
-			// Retrieve HTTP request sent to the server.
-			String request = getRequest();
+			try {
+				// Retrieve HTTP request sent to the server.
+				request = getRequest();
+				
+				// Initialize a HTTPRequest object using the read HTTP response.
+				HTTPRequest httpRequest = parseRequest(request);
+				
+				// Uses the HTTPRequest object to determine what type of HTTPResponse to send back to the client.
+				HTTPResponse httpResponse = getResponse(httpRequest);
+				
+				// Write the HTTPResponse back to the client.
+				writeResponse(httpResponse);
 			
-			// Initialize a HTTPRequest object using the read HTTP response.
-			HTTPRequest httpRequest = parseRequest(request);
-			
-			// Uses the HTTPRequest object to determine what type of HTTPResponse to send back to the client.
-			HTTPResponse httpResponse = getResponse(httpRequest);
-			
-			// Write the HTTPResponse back to the client.
-			writeResponse(httpResponse);
+			} catch (Exception e) {
+				// If parsing failed we return a HTTP response of a Internal error.
+				HTTPResponse internalErrorResponse = new HTTP500InternalServerErrorResponse();
+				writeResponse(internalErrorResponse);
+			}
 			
 			// Close the socket when done.
 			try {

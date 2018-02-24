@@ -1,5 +1,12 @@
 package com.mywebserver.request;
 
+/**
+ * Enum that conatins the types of Headers available in a HTTPRequest.
+ * 
+ * @author Oskar
+ * @version 00.00.00
+ * @name Header.java
+ */
 public enum Header {
 	Host("Host"),
 	ContentType("Content-Type"), 
