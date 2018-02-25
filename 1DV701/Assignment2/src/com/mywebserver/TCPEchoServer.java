@@ -184,6 +184,16 @@ class ServerClient implements Runnable {
 						return new HTTP302FoundResponse("/");
 					}
 					
+					// Set directory that returns a error response for testing purposes.
+					if (request.getUrl().contains("/errordir")) {
+						return new HTTP500InternalServerErrorResponse();
+					}
+					
+					// Set directory that returns a forbidden response for testing purposes.
+					if (request.getUrl().contains("/forbiddendir")) {
+						return new HTTP403ForbiddenResponse();
+					}
+					
 					// Read the file located at the URL of the HTTPRequest.
 					File file = translateURL(request.getUrl());
 					return new HTTP200OKResponse(file);
