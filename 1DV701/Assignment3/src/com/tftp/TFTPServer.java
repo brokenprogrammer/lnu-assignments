@@ -8,12 +8,15 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class TFTPServer 
 {
 	public static final int TFTPPORT = 4970;
 	public static final int BUFSIZE = 516;
-	public static final String READDIR = "/shared/read/"; //custom address at your PC
+	public static final String READDIR = "shared/read/"; //custom address at your PC
 	public static final String WRITEDIR = "/shared/write/"; //custom address at your PC
 	// OP codes
 	public static final int OP_RRQ = 1;
@@ -162,33 +165,88 @@ public class TFTPServer
 		if(opcode == OP_RRQ)
 		{
 			// See "TFTP Formats" in TFTP specification for the DATA and ACK packet contents
-			boolean result = send_DATA_receive_ACK(params);
+			Path path = Paths.get(requestedFile.split("\u0000")[0]);
+			byte[] filecontent = null;
+			try {
+				filecontent = Files.readAllBytes(path);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			System.out.println(filecontent.length);
+			
+			//TODO: Clean up, add support for multiple blocks and reading files larger than 512 bytes.
+			
+			short blockNumber = 1;
+			byte[] buf = new byte[BUFSIZE];
+			short shortVal = (short)OP_DAT;
+			ByteBuffer wrap = ByteBuffer.wrap(buf);
+			wrap.putShort(shortVal);
+			wrap.putShort(blockNumber);
+			wrap.put(filecontent);
+			boolean result = send_DATA_receive_ACK(sendSocket, buf);
+			
+			
+			System.out.println(result);
+			
 		}
 		else if (opcode == OP_WRQ) 
 		{
-			boolean result = receive_DATA_send_ACK(params);
+//			boolean result = receive_DATA_send_ACK(params);
 		}
 		else 
 		{
 			System.err.println("Invalid request. Sending an error packet.");
 			// See "TFTP Formats" in TFTP specification for the ERROR packet contents
-			send_ERR(params);
+//			send_ERR(params);
 			return;
 		}		
 	}
 	
 	/**
-	To be implemented
+	*	TODO: CLEAN
 	*/
-	private boolean send_DATA_receive_ACK(params)
-	{return true;}
+	private boolean send_DATA_receive_ACK(DatagramSocket sendSocket, byte[] buf)
+	{
+		ByteBuffer unWrap = ByteBuffer.wrap(buf);
+		short sentOpcode = unWrap.getShort();
+		short sentBlocknr = unWrap.getShort();
+		
+		DatagramPacket p = new DatagramPacket(buf, buf.length);
+		try {
+			sendSocket.send(p);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			sendSocket.receive(p);
+			
+			byte[] data = p.getData();
+			
+			ByteBuffer wrap= ByteBuffer.wrap(data);
+			short opcode = wrap.getShort();
+			short blocknr = wrap.getShort();
+			
+			if (opcode == OP_ACK && blocknr == sentBlocknr) {
+				return true;
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
 	
-	private boolean receive_DATA_send_ACK(params)
-	{return true;}
-	
-	private void send_ERR(params)
-	{}
-	
+//	private boolean receive_DATA_send_ACK(params)
+//	{return true;}
+//	
+//	private void send_ERR(params)
+//	{}
+//	
 }
 
 
