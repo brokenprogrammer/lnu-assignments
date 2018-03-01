@@ -1,6 +1,8 @@
 package com.tftp;
 
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -105,12 +107,16 @@ public class TFTPServer
 	private InetSocketAddress receiveFrom(DatagramSocket socket, byte[] buf) 
 	{
 		// Create datagram packet
+		DatagramPacket packet = new DatagramPacket(buf, buf.length);
 		
 		// Receive packet
+		socket.receive(packet);
 		
 		// Get client address and port from the packet
+		int port = packet.getPort();
+		InetAddress address = packet.getAddress();
 		
-		return socketAddress;
+		return new InetSocketAddress(address, port);
 	}
 
 	/**
