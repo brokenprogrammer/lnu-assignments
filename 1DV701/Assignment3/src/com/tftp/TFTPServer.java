@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 
 public class TFTPServer 
 {
@@ -128,7 +129,14 @@ public class TFTPServer
 	 */
 	private int ParseRQ(byte[] buf, StringBuffer requestedFile) 
 	{
-		// See "TFTP Formats" in TFTP specification for the RRQ/WRQ request contents
+		// See "TFTP Formats" in TFTP specification for the RRQ/WRQ request contents		
+		int opcode = ((buf[0] & 0xFF) << 8) | (buf[1] & 0xFF);
+		if (opcode < 1 || opcode > 5) {
+			// Errors.. 
+		}
+		
+		requestedFile.append(new String(buf, 2, buf.length-2));
+		
 		
 		return opcode;
 	}
