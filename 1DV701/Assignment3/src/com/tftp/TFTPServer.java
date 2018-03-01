@@ -1,5 +1,6 @@
 package com.tftp;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -12,8 +13,8 @@ public class TFTPServer
 {
 	public static final int TFTPPORT = 4970;
 	public static final int BUFSIZE = 516;
-	public static final String READDIR = "/home/username/read/"; //custom address at your PC
-	public static final String WRITEDIR = "/home/username/write/"; //custom address at your PC
+	public static final String READDIR = "/shared/read/"; //custom address at your PC
+	public static final String WRITEDIR = "/shared/write/"; //custom address at your PC
 	// OP codes
 	public static final int OP_RRQ = 1;
 	public static final int OP_WRQ = 2;
@@ -22,11 +23,11 @@ public class TFTPServer
 	public static final int OP_ERR = 5;
 
 	public static void main(String[] args) {
-		if (args.length > 0) 
-		{
-			System.err.printf("usage: java %s\n", TFTPServer.class.getCanonicalName());
-			System.exit(1);
-		}
+//		if (args.length > 0) 
+//		{
+//			System.err.printf("usage: java %s\n", TFTPServer.class.getCanonicalName());
+//			System.exit(1);
+//		}
 		//Starting the server
 		try 
 		{
@@ -62,7 +63,11 @@ public class TFTPServer
 
 			final StringBuffer requestedFile= new StringBuffer();
 			final int reqtype = ParseRQ(buf, requestedFile);
-
+			
+			// DEBUG..
+			System.out.println(reqtype);
+			System.out.println(requestedFile.toString());
+			
 			new Thread() 
 			{
 				public void run() 
@@ -76,7 +81,7 @@ public class TFTPServer
 						
 						System.out.printf("%s request for %s from %s using port %d\n",
 								(reqtype == OP_RRQ)?"Read":"Write",
-								clientAddress.getHostName(), clientAddress.getPort());  
+								clientAddress.getHostName(), clientAddress.getPort(), TFTPPORT);  
 								
 						// Read request
 						if (reqtype == OP_RRQ) 
@@ -111,7 +116,11 @@ public class TFTPServer
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
 		
 		// Receive packet
-		socket.receive(packet);
+		try {
+			socket.receive(packet);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		// Get client address and port from the packet
 		int port = packet.getPort();
