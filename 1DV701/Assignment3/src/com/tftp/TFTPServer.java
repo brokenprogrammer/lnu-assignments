@@ -1,23 +1,29 @@
 package com.tftp;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class TFTPServer 
 {
 	public static final int TFTPPORT = 4970;
 	public static final int BUFSIZE = 516;
 	public static final String READDIR = "shared/read/"; //custom address at your PC
-	public static final String WRITEDIR = "/shared/write/"; //custom address at your PC
+	public static final String WRITEDIR = "shared/write/"; //custom address at your PC
 	// OP codes
 	public static final int OP_RRQ = 1;
 	public static final int OP_WRQ = 2;
@@ -26,11 +32,7 @@ public class TFTPServer
 	public static final int OP_ERR = 5;
 
 	public static void main(String[] args) {
-//		if (args.length > 0) 
-//		{
-//			System.err.printf("usage: java %s\n", TFTPServer.class.getCanonicalName());
-//			System.exit(1);
-//		}
+		
 		//Starting the server
 		try 
 		{
@@ -174,27 +176,61 @@ public class TFTPServer
 				e.printStackTrace();
 			}
 			
-			
-			System.out.println(filecontent.length);
-			
-			//TODO: Clean up, add support for multiple blocks and reading files larger than 512 bytes.
+			System.out.println("File Length: " + filecontent.length);
 			
 			short blockNumber = 1;
 			byte[] buf = new byte[BUFSIZE];
 			short shortVal = (short)OP_DAT;
-			ByteBuffer wrap = ByteBuffer.wrap(buf);
-			wrap.putShort(shortVal);
-			wrap.putShort(blockNumber);
-			wrap.put(filecontent);
-			boolean result = send_DATA_receive_ACK(sendSocket, buf);
-			
-			
-			System.out.println(result);
-			
+			boolean result = false;
+			if (filecontent.length <= 512) {
+				ByteBuffer wrap = ByteBuffer.wrap(buf);
+				wrap.putShort(shortVal);
+				wrap.putShort(blockNumber);
+				wrap.put(filecontent);
+				result = send_DATA_receive_ACK(sendSocket, buf);
+			} else {
+				for (int len = 0; len <= filecontent.length; blockNumber++) {
+					buf = new byte[BUFSIZE];
+					if (filecontent.length - len > 512) {
+						// Read 512
+						ByteBuffer wrap = ByteBuffer.wrap(buf);
+						wrap.putShort(shortVal);
+						wrap.putShort(blockNumber);
+						wrap.put(filecontent, len, 512);
+						len += 512;
+						result = send_DATA_receive_ACK(sendSocket, buf);
+					} 
+					else {
+						// Read Rest
+						ByteBuffer wrap = ByteBuffer.wrap(buf);
+						wrap.putShort(shortVal);
+						wrap.putShort(blockNumber);
+						wrap.put(filecontent, len, (filecontent.length - len));
+						len = Integer.MAX_VALUE; // Terminates loop.
+						result = send_DATA_receive_ACK(sendSocket, buf);
+					}
+				}
+			}
 		}
 		else if (opcode == OP_WRQ) 
 		{
-//			boolean result = receive_DATA_send_ACK(params);
+			// Create new file that should be written to..
+			Path path = Paths.get(requestedFile.split("\u0000")[0]);
+			try {
+				Files.deleteIfExists(path);
+				path = Files.createFile(path);
+				byte[] buf = new byte[BUFSIZE-4];
+				
+				// Start with sending ack to let client know we are ready to recieve.
+				send_ACK_Zero(sendSocket);
+				
+				while (receive_DATA_send_ACK(sendSocket, buf) == true) {
+					Files.write(path, buf, StandardOpenOption.APPEND);
+				}
+				
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 		else 
 		{
@@ -217,21 +253,26 @@ public class TFTPServer
 		DatagramPacket p = new DatagramPacket(buf, buf.length);
 		try {
 			sendSocket.send(p);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			sendSocket.receive(p);
+			sendSocket.setSoTimeout(1000);
 			
-			byte[] data = p.getData();
-			
-			ByteBuffer wrap= ByteBuffer.wrap(data);
-			short opcode = wrap.getShort();
-			short blocknr = wrap.getShort();
-			
-			if (opcode == OP_ACK && blocknr == sentBlocknr) {
-				return true;
+			while (true) {
+				try {
+					sendSocket.receive(p);
+					
+					byte[] data = p.getData();
+					
+					ByteBuffer wrap= ByteBuffer.wrap(data);
+					short opcode = wrap.getShort();
+					short blocknr = wrap.getShort();
+
+					if (opcode == OP_ACK && blocknr == sentBlocknr) {
+						return true;
+					}
+					
+				} catch (SocketTimeoutException e) {
+					// Send packet again if timeout..
+					sendSocket.send(p);
+				}
 			}
 			
 		} catch (IOException e) {
@@ -241,9 +282,62 @@ public class TFTPServer
 		return false;
 	}
 	
-//	private boolean receive_DATA_send_ACK(params)
-//	{return true;}
-//	
+	private boolean receive_DATA_send_ACK(DatagramSocket recieveSocket, byte[] buf) {
+		
+		byte[] newBUFFER = new byte[BUFSIZE];
+		DatagramPacket data = new DatagramPacket(newBUFFER, newBUFFER.length);
+		
+		try {
+			recieveSocket.receive(data);
+			
+			byte[] datacontent = data.getData();
+			ByteBuffer unWrap = ByteBuffer.wrap(datacontent);
+			short recvOpcode = unWrap.getShort();
+			short recvBlocknr = unWrap.getShort();
+			
+			// Put recieved bytes into the buffer.
+			for (int i = 0, x = 4; i < (BUFSIZE-4); i++, x++) {
+				buf[i] = datacontent[x];
+			}
+			
+			
+			// Send acknowledges
+			byte[] ackbuf = new byte[4];
+			ByteBuffer wrap = ByteBuffer.wrap(ackbuf);
+			wrap.putShort((short)OP_ACK);
+			wrap.putShort(recvBlocknr);
+			DatagramPacket ack = new DatagramPacket(ackbuf, ackbuf.length);
+			recieveSocket.send(ack);
+			
+			// If less than 512 was recieved its done recieveing..
+			if(datacontent.length < 512) {
+				System.out.println("low data false : " + datacontent.length);
+				return false;
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		return true;
+	}
+	
+	void send_ACK_Zero(DatagramSocket recieveSocket) {
+		byte[] ackbuf = new byte[4];
+		ByteBuffer wrap = ByteBuffer.wrap(ackbuf);
+		wrap.putShort((short)OP_ACK);
+		wrap.putShort((short) 0);
+		
+		DatagramPacket ack = new DatagramPacket(ackbuf, ackbuf.length);
+		try {
+			recieveSocket.send(ack);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 //	private void send_ERR(params)
 //	{}
 //	
