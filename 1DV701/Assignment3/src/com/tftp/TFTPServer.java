@@ -225,7 +225,8 @@ public class TFTPServer
 				send_ACK_Zero(sendSocket);
 				
 				while (receive_DATA_send_ACK(sendSocket, buf) == true) {
-					Files.write(path, buf, StandardOpenOption.APPEND);
+					String content = new String(buf);
+					Files.write(path, content.trim().getBytes(), StandardOpenOption.APPEND);
 				}
 				
 			} catch (IOException e1) {
