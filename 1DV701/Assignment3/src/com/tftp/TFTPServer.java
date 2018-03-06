@@ -69,9 +69,8 @@ public class TFTPServer
 			final StringBuffer requestedFile= new StringBuffer();
 			final int reqtype = ParseRQ(buf, requestedFile);
 			
-			// DEBUG..
-			System.out.println(reqtype);
-			System.out.println(requestedFile.toString());
+			// TODO: DEBUG
+			System.out.println(reqtype + requestedFile.toString());
 			
 			new Thread() 
 			{
@@ -168,12 +167,18 @@ public class TFTPServer
 		{
 			// See "TFTP Formats" in TFTP specification for the DATA and ACK packet contents
 			Path path = Paths.get(requestedFile.split("\u0000")[0]);
+			
+			if (!path.toFile().exists()) {
+				send_ERR(sendSocket, (short)1, "Requested file does not exist.");
+				return;
+			}
+			
 			byte[] filecontent = null;
 			try {
 				filecontent = Files.readAllBytes(path);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				send_ERR(sendSocket, (short)2, "Failed to read from file.");
+				return;
 			}
 			
 			System.out.println("File Length: " + filecontent.length);
@@ -216,8 +221,13 @@ public class TFTPServer
 		{
 			// Create new file that should be written to..
 			Path path = Paths.get(requestedFile.split("\u0000")[0]);
+			
+			if (path.toFile().exists()) {
+				send_ERR(sendSocket, (short)6, "File already exists.");
+				return;
+			}
+			
 			try {
-				Files.deleteIfExists(path);
 				path = Files.createFile(path);
 				byte[] buf = new byte[BUFSIZE-4];
 				
@@ -230,14 +240,15 @@ public class TFTPServer
 				}
 				
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				send_ERR(sendSocket, (short)2, "An I/O Exception occured.");
+				return;
 			}
 		}
 		else 
 		{
 			System.err.println("Invalid request. Sending an error packet.");
-			// See "TFTP Formats" in TFTP specification for the ERROR packet contents
-//			send_ERR(params);
+			send_ERR(sendSocket, (short)0, "Invalid request.");
+			
 			return;
 		}		
 	}
@@ -277,7 +288,7 @@ public class TFTPServer
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			send_ERR(sendSocket, (short)2, "I/O Error while sending DATA response.");
 		}
 		
 		return false;
@@ -317,7 +328,8 @@ public class TFTPServer
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			send_ERR(recieveSocket, (short)2, "I/O Error while receiveing DATA response.");
+			return false;
 		}
 		
 		
@@ -334,14 +346,33 @@ public class TFTPServer
 		try {
 			recieveSocket.send(ack);
 		} catch (IOException e) {
-			e.printStackTrace();
+			send_ERR(recieveSocket, (short)2, "I/O Error while sending ACK zero.");
+			return;
 		}
 	}
 	
 	
-//	private void send_ERR(params)
-//	{}
-//	
+	private void send_ERR(DatagramSocket recieveSocket, short errorcode, String message) {
+		int packetSize = 5 + message.length();
+		byte[] errorBuffer = new byte[packetSize];
+		
+		ByteBuffer wrap = ByteBuffer.wrap(errorBuffer);
+		wrap.putShort((short)OP_ERR);
+		wrap.putShort(errorcode);
+		wrap.put(message.getBytes());
+		wrap.put((byte)0);
+		
+		
+		DatagramPacket err = new DatagramPacket(errorBuffer, errorBuffer.length);
+		
+		try {
+			recieveSocket.send(err);
+		} catch (IOException e) {
+			send_ERR(recieveSocket, (short)2, "I/O Error while sending Error response.");
+			return;
+		}
+	}
+	
 }
 
 
