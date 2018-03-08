@@ -69,9 +69,6 @@ public class TFTPServer
 			final StringBuffer requestedFile= new StringBuffer();
 			final int reqtype = ParseRQ(buf, requestedFile);
 			
-			// TODO: DEBUG
-			System.out.println(reqtype + requestedFile.toString());
-			
 			new Thread() 
 			{
 				public void run() 
@@ -188,6 +185,7 @@ public class TFTPServer
 			short shortVal = (short)OP_DAT;
 			boolean result = false;
 			if (filecontent.length <= 512) {
+				buf = new byte[filecontent.length + 4];
 				ByteBuffer wrap = ByteBuffer.wrap(buf);
 				wrap.putShort(shortVal);
 				wrap.putShort(blockNumber);
@@ -195,8 +193,8 @@ public class TFTPServer
 				result = send_DATA_receive_ACK(sendSocket, buf);
 			} else {
 				for (int len = 0; len <= filecontent.length; blockNumber++) {
-					buf = new byte[BUFSIZE];
 					if (filecontent.length - len > 512) {
+						buf = new byte[BUFSIZE];
 						// Read 512
 						ByteBuffer wrap = ByteBuffer.wrap(buf);
 						wrap.putShort(shortVal);
@@ -206,6 +204,7 @@ public class TFTPServer
 						result = send_DATA_receive_ACK(sendSocket, buf);
 					} 
 					else {
+						buf = new byte[(filecontent.length - len) + 4];
 						// Read Rest
 						ByteBuffer wrap = ByteBuffer.wrap(buf);
 						wrap.putShort(shortVal);
