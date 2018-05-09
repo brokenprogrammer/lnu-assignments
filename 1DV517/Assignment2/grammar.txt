@@ -1,0 +1,65 @@
+program = <function-declaration>
+	| <variable-declaration>
+	| 'struct'
+
+function-declaration = TYPE NAME '(' <function-params> ')' '{' <statement> '}'
+function-params = SIGMA (Nothing)
+	| TYPE NAME
+	| TYPE NAME ',' <function-params>
+
+variable-declaration = TYPE NAME ';'
+	| TYPE NAME '=' <expr>
+
+statement = 'return' ';'
+	| 'return' <expr> ';'
+	| 'if' '(' <conditional-expr> ')' '{' <statement> '}'
+	| 'while' '(' <conditional-expr> ')' '{' <statement> '}'
+	| <expr>
+
+top-level-expr = 
+	NAME
+	| INTEGER
+	| CHAR
+	| '(' <expr> ')'
+
+post-expr = 
+	top-level-expr
+	| top-level-expr '[' <expr> ']'
+	| top-level-expr '(' ')'
+	| top-level-expr '(' TODO: ARGUMENTS ')'
+	| top-level-expr '.' NAME
+
+mult-div-expr =
+	<post-expr>
+	| <mult-div-expr> '*' <top-level-expr>
+	| <mult-div-expr> '/' <top-level-expr>
+
+add-sub-expr =
+	<mult-div-expr>
+	| <add-sub-expr> '+' <mult-div-expr>
+	| <add-sub-expr> '-' <mult-div-expr>
+
+equality-expr =
+	<add-sub-expr>
+	| <equality-expr> '==' <add-sub-expr>
+	| <equality-expr> '!=' <add-sub-expr>
+	| <equality-expr> '<' <add-sub-expr>
+	| <equality-expr> '>' <add-sub-expr>
+	| <equality-expr> '<=' <add-sub-expr>
+	| <equality-expr> '>=' <add-sub-expr>
+	
+logical-and-expr =
+	<equality-expr>
+	| <logical-and-expr> '&&' <equality-expr>
+
+logical-or-expr = 
+	<logical-and-expr>
+	| <logical-or-expr> '||' <logical-and-expr>
+
+conditional-expr =
+	<logical-or-expr>
+
+assign-expr = 
+	<conditional-expr>
+	| <top-level-expr> '=' <assign-expr>
+expr = <assign-expr>
