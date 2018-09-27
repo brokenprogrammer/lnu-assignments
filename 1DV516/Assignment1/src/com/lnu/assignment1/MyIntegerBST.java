@@ -85,9 +85,9 @@ public class MyIntegerBST implements A1Tree {
 		// https://docs.oracle.com/javase/7/docs/api/java/util/ArrayDeque.html
 		// "This class is likely to be faster than Stack when used as a stack, 
 		//	and faster than LinkedList when used as a queue."
-		int depth = 0; //1
-		Queue<NodeDepthTuple> queue = new ArrayDeque<NodeDepthTuple>(); // 1
-		queue.add(new NodeDepthTuple(root, 0)); // 1
+		int depth = 0;
+		Queue<NodeDepthTuple> queue = new ArrayDeque<NodeDepthTuple>();
+		queue.add(new NodeDepthTuple(root, 0));
 		
 		
 		// Printing first level depth
