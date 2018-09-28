@@ -1,8 +1,5 @@
 package com.lnu.assignment1;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
-
 /**
  * Our implementation of the described MyIntegerBST of assignment 1
  * in course 1DV516.
@@ -80,13 +77,8 @@ public class MyIntegerBST implements A1Tree {
 			throw new IllegalStateException("The tree is empty, there is no similar values.");
 		}
 		
-		// NOTE: 
-		// Using array dequeue because according to documentation at:
-		// https://docs.oracle.com/javase/7/docs/api/java/util/ArrayDeque.html
-		// "This class is likely to be faster than Stack when used as a stack, 
-		//	and faster than LinkedList when used as a queue."
 		int depth = 0;
-		Queue<NodeDepthTuple> queue = new ArrayDeque<NodeDepthTuple>();
+		NodeDepthTupleQueue queue = new NodeDepthTupleQueue();
 		queue.add(new NodeDepthTuple(root, 0));
 		
 		
@@ -134,6 +126,55 @@ public class MyIntegerBST implements A1Tree {
 			this.value = value;
 			this.left = null;
 			this.right = null;
+		}
+	}
+	
+	private class NodeDepthTupleQueue {
+		private class Node {
+			NodeDepthTuple value;
+			Node next;
+			
+			public Node (NodeDepthTuple value) {
+				this.value = value;
+				this.next = null;
+			}
+		}
+		
+		Node head;
+		int size;
+		
+		public NodeDepthTupleQueue() {
+			this.head = null;
+			this.size = 0;
+		}
+		
+		public void add(NodeDepthTuple x) {
+			if (head == null) {
+				this.head = new Node(x);
+				this.size++;
+			} else {
+				Node n = this.head;
+				while(n.next != null) {
+					n = n.next;
+				}
+				
+				n.next = new Node(x);
+				this.size++;
+			}
+		}
+		
+		public NodeDepthTuple poll() {
+			Node node = this.head;
+			this.head = this.head.next;
+			node.next = null;
+			
+			this.size--;
+			
+			return node.value;
+		}
+		
+		public boolean isEmpty() {
+			return (size == 0) ? true : false;
 		}
 	}
 }
