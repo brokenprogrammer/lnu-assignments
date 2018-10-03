@@ -141,6 +141,7 @@ public class MyIntegerBST implements A1Tree {
 		}
 		
 		Node head;
+		Node tail;
 		int size;
 		
 		public NodeDepthTupleQueue() {
@@ -148,21 +149,21 @@ public class MyIntegerBST implements A1Tree {
 			this.size = 0;
 		}
 		
+		// O(1)
 		public void add(NodeDepthTuple x) {
-			if (head == null) {
-				this.head = new Node(x);
-				this.size++;
+			Node newNode = new Node(x);
+			
+			if (isEmpty()) {
+				head = newNode;
 			} else {
-				Node n = this.head;
-				while(n.next != null) {
-					n = n.next;
-				}
-				
-				n.next = new Node(x);
-				this.size++;
+				tail.next = newNode;
 			}
+			
+			tail = newNode;
+			this.size++;
 		}
 		
+		//O(1)
 		public NodeDepthTuple poll() {
 			Node node = this.head;
 			this.head = this.head.next;
@@ -173,6 +174,7 @@ public class MyIntegerBST implements A1Tree {
 			return node.value;
 		}
 		
+		// O(1)
 		public boolean isEmpty() {
 			return (size == 0) ? true : false;
 		}
