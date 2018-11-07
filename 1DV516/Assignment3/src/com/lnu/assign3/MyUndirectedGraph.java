@@ -5,7 +5,7 @@ import java.util.List;
 
 public class MyUndirectedGraph implements A3Graph {
 
-	private MyArrayList<MyArrayList<Integer>> adjacencyList;
+	protected MyArrayList<MyArrayList<Integer>> adjacencyList;
 	
 	public MyUndirectedGraph() {
 		this.adjacencyList = new MyArrayList<MyArrayList<Integer>>();

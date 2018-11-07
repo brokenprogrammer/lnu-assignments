@@ -95,7 +95,7 @@ public class MyArrayList<T> {
 	public int indexOf(Object element) {
 		for(int x = 0; x < this.array.length; x++) {
 			T target = (T)this.array[x];
-			if (target.equals(element)) {
+			if (element.equals(target)) {
 				return x;
 			}
 		}
