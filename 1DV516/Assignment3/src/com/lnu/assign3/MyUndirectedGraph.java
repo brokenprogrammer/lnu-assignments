@@ -1,10 +1,11 @@
 package com.lnu.assign3;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyUndirectedGraph implements A3Graph {
 
-	MyArrayList<MyArrayList<Integer>> adjacencyList;
+	private MyArrayList<MyArrayList<Integer>> adjacencyList;
 	
 	public MyUndirectedGraph() {
 		this.adjacencyList = new MyArrayList<MyArrayList<Integer>>();
@@ -85,22 +86,118 @@ public class MyUndirectedGraph implements A3Graph {
 
     @Override
     public List<List<Integer>> connectedComponents() {
-	// TODO Auto-generated method stub
-	return null;
+    	MyArrayList<MyArrayList<Integer>> connectedComponents = new MyArrayList<MyArrayList<Integer>>();
+    	boolean visited[] = new boolean[this.adjacencyList.size()];
+    	boolean v2[] = new boolean[this.adjacencyList.size()];
+    	
+    	for(int vertex = 0; vertex < this.adjacencyList.size(); ++vertex) {
+    		if (visited[vertex] == false) {
+    			checkConnectedEdges(vertex, v2);
+    			MyArrayList<Integer> component = new MyArrayList<Integer>();
+
+    			for (int i = 0; i < visited.length; ++i) {
+    				if (v2[i]) {    					
+    					visited[i] = v2[i];
+    					component.add(i);
+    				}
+    			}
+    			
+    			connectedComponents.add(component);
+    			v2 = new boolean[this.adjacencyList.size()];
+    		}
+    	}
+    	
+    	List<List<Integer>> result = new ArrayList<List<Integer>>();
+    	
+    	for (int i = 0; i < connectedComponents.size(); ++i) {
+    		MyArrayList<Integer> target = connectedComponents.get(i);
+    		ArrayList<Integer> destination = new ArrayList<Integer>();
+    		
+    		for (int j = 0; j < target.size(); ++j) {
+    			destination.add(target.get(j));
+    		}
+    		result.add(destination);
+    	}
+		return result;
     }
 
     @Override
     public boolean hasEulerPath() {
-	// TODO Auto-generated method stub
-	return A3Graph.super.hasEulerPath();
+    	if (isConnected() == false) {
+    		return false;
+    	}
+    	
+	    int verticesWithOddEdges = 0;
+		for (int vertex = 0; vertex < this.adjacencyList.size(); ++vertex) {
+	    	if (!(this.adjacencyList.get(vertex).size() % 2 == 0)) {
+	    		verticesWithOddEdges++;
+	    	}
+	    }
+	    	
+		if (verticesWithOddEdges > 2) {
+			return false;
+		}
+		
+		return true;
     }
 
-    @Override
-    public List<Integer> eulerPath() {
-	// TODO Auto-generated method stub
-	return A3Graph.super.eulerPath();
+    private int processEulerEdge(int position, MyArrayIntStack stack, MyArrayList<Integer> path) {
+    	if (this.adjacencyList.get(position).size() >= 1) {
+			stack.push(position);
+			position = this.adjacencyList.get(position).remove(0);
+			for (int i = 0; i < this.adjacencyList.get(position).size(); i++) {
+				if (this.adjacencyList.get(position).get(i) == stack.peek()) {
+					this.adjacencyList.get(position).remove(i);
+				}
+			}
+		} else {
+			path.add(position);
+			position = stack.pop();
+		}
+    	
+    	return position;
     }
     
-    
+    @Override
+    public List<Integer> eulerPath() {
+    	if (!hasEulerPath()) {
+    		return null;
+    	}
+    	
+    	int verticesWithOddEdges = 0;
+		int firstOddVertice = Integer.MIN_VALUE;
+    	
+		for (int vertex = 0; vertex < this.adjacencyList.size(); ++vertex) {
+	    	if (!(this.adjacencyList.get(vertex).size() % 2 == 0)) {
+	    		verticesWithOddEdges++;
+	    		if (vertex > firstOddVertice) {
+	    			firstOddVertice = vertex;
+	    		}
+	    	}
+	    }
+		
+		MyArrayList<Integer> path = new MyArrayList<Integer>();
+		MyArrayIntStack stack = new MyArrayIntStack();
+		int position = 0;
+		if (verticesWithOddEdges == 0) {
+			position = 0;
+		} else if (verticesWithOddEdges == 2) {
+			position = firstOddVertice;
+		}
+		
+		position = processEulerEdge(position, stack, path);
+		
+		while (!(stack.isEmpty())) {
+			position = processEulerEdge(position, stack, path);	
+		}
+		path.add(position);
+		
+		List<Integer> result = new ArrayList<Integer>(); 
+		for (int i = 0; i < path.size(); i++) {
+			result.add(path.get(i));
+		}
+		
+		return result;
+    }
 
 }

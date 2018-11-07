@@ -1,10 +1,15 @@
 package com.lnu.assign3;
 
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ 
+ *
+ */
 public class MyDirectedGraph implements A3Graph {
 
-	MyArrayList<MyArrayList<Integer>> adjacencyList;
+	private MyArrayList<MyArrayList<Integer>> adjacencyList;
 	
 	public MyDirectedGraph() {
 		this.adjacencyList = new MyArrayList<MyArrayList<Integer>>();
@@ -65,6 +70,8 @@ public class MyDirectedGraph implements A3Graph {
     	for (int edge = 0; edge < edges.size(); ++edge) {
     		if (checkAsyclicEdges(edges.get(edge), visited)) {
     			return true;
+    		} else {
+    			visited[edges.get(edge)] = false;
     		}
     	}
     	
@@ -88,8 +95,39 @@ public class MyDirectedGraph implements A3Graph {
 
     @Override
     public List<List<Integer>> connectedComponents() {
-		// TODO Auto-generated method stub
-		return null;
+    	MyArrayList<MyArrayList<Integer>> connectedComponents = new MyArrayList<MyArrayList<Integer>>();
+    	boolean visited[] = new boolean[this.adjacencyList.size()];
+    	boolean v2[] = new boolean[this.adjacencyList.size()];
+    	
+    	for(int vertex = 0; vertex < this.adjacencyList.size(); ++vertex) {
+    		if (visited[vertex] == false) {
+    			checkAsyclicEdges(vertex, v2);
+    			MyArrayList<Integer> component = new MyArrayList<Integer>();
+
+    			for (int i = 0; i < visited.length; ++i) {
+    				if (v2[i]) {    					
+    					visited[i] = v2[i];
+    					component.add(i);
+    				}
+    			}
+    			
+    			connectedComponents.add(component);
+    			v2 = new boolean[this.adjacencyList.size()];
+    		}
+    	}
+    	
+    	List<List<Integer>> result = new ArrayList<List<Integer>>();
+    	
+    	for (int i = 0; i < connectedComponents.size(); ++i) {
+    		MyArrayList<Integer> target = connectedComponents.get(i);
+    		ArrayList<Integer> destination = new ArrayList<Integer>();
+    		
+    		for (int j = 0; j < target.size(); ++j) {
+    			destination.add(target.get(j));
+    		}
+    		result.add(destination);
+    	}
+		return result;
     }
 
 }
