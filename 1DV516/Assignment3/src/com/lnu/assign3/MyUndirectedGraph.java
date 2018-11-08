@@ -3,6 +3,13 @@ package com.lnu.assign3;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * NOTE: This class is dependant on vertices starting from 0 and not being added in different order
+ * for example: addVertex(0); addVertex(5); will break the ordering within the graph structure.
+ * 
+ * @author Oskar Mendel
+ * @author Jesper Bergström
+ */
 public class MyUndirectedGraph implements A3Graph {
 
 	protected MyArrayList<MyArrayList<Integer>> adjacencyList;

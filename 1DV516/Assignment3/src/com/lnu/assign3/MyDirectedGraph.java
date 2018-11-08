@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- 
- *
+ * NOTE: This class is dependant on vertices starting from 0 and not being added in different order
+ * for example: addVertex(0); addVertex(5); will break the ordering within the graph structure.
+ * 
+ * @author Oskar Mendel
+ * @author Jesper Bergström
  */
 public class MyDirectedGraph implements A3Graph {
 
@@ -13,7 +16,6 @@ public class MyDirectedGraph implements A3Graph {
 	
 	public MyDirectedGraph() {
 		this.adjacencyList = new MyArrayList<MyArrayList<Integer>>();
-		//this.addVertex(0);
 	}
 	
     @Override
