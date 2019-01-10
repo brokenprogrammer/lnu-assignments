@@ -1,27 +1,26 @@
 'use-strict'
 
-let mongoose = require('mongoose')
+let mysql = require('mysql')
 
-function init () {
+function databaseMiddleware (req, res, next) {
   let dbConfig = require('../config/database.js')
-  let db = mongoose.connection
-
-  // TODO: db.on error
-  db.on('error', console.error.bind(console, 'Connection error: '))
-
-  // TODO: db.on open
-  db.once('open', function () {
-    console.log('Connected to database')
+  res.locals.connection = mysql.createConnection({
+    host: dbConfig.host,
+    user: dbConfig.user,
+    password: dbConfig.password,
+    database: dbConfig.database
   })
 
-  process.on('SIGINT', function () {
-    db.close(function () {
-      console.log('Database connection has been terminated.')
-      process.exit(0)
-    })
+  res.locals.connection.connect()
+
+  // Create User table if it doesn't exist.
+  res.locals.connection.query(require('../models/User.js').userTable, function (error, results, fields) {
+    if (error) {
+      console.log(error.message)
+    }
   })
 
-  mongoose.connect(dbConfig.connectionString, { useNewUrlParser: true })
+  next()
 }
 
-module.exports.init = init
+module.exports.databaseMiddleware = databaseMiddleware
