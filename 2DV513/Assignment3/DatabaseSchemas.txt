@@ -1,0 +1,25 @@
+User database schema:
+ID bigint primary key auto increment
+Username string unique required
+Password string required
+RegisteredAt Date Default now required
+
+Diagram database schema:
+ID bigint primary key auto increment
+Title string required default "Untitled"
+Code string required
+Author int (reference to a user id) requried
+
+https://stackoverflow.com/a/3579462
+ClassDiagram database schema:
+ID bigint primary key... (FOREIGN KEY (diagram_id) REFERENCES diagram (diagram_id))
+ClassType string required
+
+https://stackoverflow.com/a/3579462
+DFADiagram database schema:
+ID bigint primary key... (FOREIGN KEY (diagram_id) REFERENCES diagram (diagram_id))
+isNFA bool required
+
+UserLikes database scehama:
+UserID bigint required
+DiagramID bigint required

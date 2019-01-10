@@ -1,0 +1,19 @@
+<div class="container">
+    <div class="main-div-createsnippet">
+        <div class="panel">
+            <h2>You're updating {{title}}</h2>
+            <p>Please enter your changes and then submit then to update your codesnippet.</p>
+
+            <form action="/codesnippet/update/{{id}}" method="post">
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                <div class="form-group">
+                    <input type="text" name="title" value="{{title}}">
+                </div>
+                <div class="form-group">
+                    <textarea class="textarea-code" name="code">{{code}}</textarea>
+                </div>
+                <input class="btn btn-primary" type="submit" value="Update">
+            </form>
+        </div>
+    </div>
+</div>

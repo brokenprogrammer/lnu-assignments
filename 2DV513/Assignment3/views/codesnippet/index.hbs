@@ -1,0 +1,25 @@
+<div class="container">
+    {{#unless single}}
+    <h1 class="mb-5">All Codesnippets</h1>
+    <ul class="list-group">
+        {{#each codesnippets}}
+            <li class="list-group-item">
+                {{title}} - <span class="date">{{postedAt}}</span> 
+                <a class="float-right" href="/codesnippet/{{id}}">View</a>
+            </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <h1>{{title}}</h1>
+    <p class="lead">{{author}}, <span class="date">{{postedAt}}</span></p>
+    {{#ifEqual username author}}
+        <a class="btn btn-danger" href="/codesnippet/delete/{{id}}" role="button">Delete</a>
+        <a class="btn btn-primary" href="/codesnippet/update/{{id}}" role="button">Update</a>
+    {{/ifEqual}}
+    <pre>
+        <code>
+            {{code}}
+        </code>
+    </pre>
+    {{/unless}}
+</div>

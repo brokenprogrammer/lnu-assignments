@@ -1,0 +1,34 @@
+{
+  "name": "om222dq-examination-2",
+  "version": "1.0.0",
+  "description": "om222dq",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "standard",
+    "lint": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1dv523/om222dq-examination-2.git"
+  },
+  "author": "Oskar Mendel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/1dv523/om222dq-examination-2/issues"
+  },
+  "homepage": "https://github.com/1dv523/om222dq-examination-2#readme",
+  "dependencies": {
+    "bcrypt": "^3.0.2",
+    "body-parser": "^1.18.3",
+    "csurf": "^1.9.0",
+    "express": "^4.16.4",
+    "express-handlebars": "^3.0.0",
+    "express-session": "^1.15.6",
+    "helmet": "^3.15.0",
+    "mongoose": "^5.3.14"
+  },
+  "devDependencies": {
+    "standard": "^12.0.1"
+  }
+}
