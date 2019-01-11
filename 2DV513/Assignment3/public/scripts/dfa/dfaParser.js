@@ -57,6 +57,7 @@ export class DFAParser {
 
 export class Arrow {
   constructor (from, to, text) {
+    this.points = []
     this.from = from
     this.to = to
     this.text = text
@@ -65,6 +66,10 @@ export class Arrow {
 
 export class State {
   constructor (name, type) {
+    this.x = null
+    this.y = null
+    this.width = null
+    this.height = null
     this.connections = []
     this.name = name
     this.type = type
