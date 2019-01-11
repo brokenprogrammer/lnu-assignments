@@ -113,6 +113,16 @@ router.route('/register')
         password: request.body.password
       }
 
+      // NOTE: Validation of password containing 6 characters and one number.
+      if (!(request.body.password.length >= 6 && /\d+/.test(request.body.password))) {
+        request.session.flash = {
+          type: 'register-failed-validation',
+          message: 'Password must contain atleast 8 characters and one digit.'
+        }
+
+        return response.status(400).redirect('/register')
+      }
+
       // Verify that user with username doesn't exist
       response.locals.connection.query(User.findByUsername, request.body.username,
         function (error, results, fields) {
