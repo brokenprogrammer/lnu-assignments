@@ -1,3 +1,5 @@
+import { DFARenderer } from './dfaRenderer.js'
+
 export class DFA {
   constructor () {
     this.doneObjects = []
@@ -20,8 +22,8 @@ export class DFA {
       this.objects[1].x = 400 + this.length
       this.objects[1].y = 400
     }
-    this.doneObjects.add(this.objects[0])
-    this.doneObjects.add(this.objects[1])
+    this.doneObjects.push(this.objects[0])
+    this.doneObjects.push(this.objects[1])
     for (let i = 0; i < this.objects.length; i++) {
       let s = objects[i]
       this.placeConnections(s)
@@ -76,15 +78,15 @@ export class DFA {
               s.connections[j].points.push(temp)
               s.connections[j].points[1] = new Point(middle.x - x, middle.y - y)
               this.setEdgePoints(s.connections[j])
-              doneArrows.add(s.connections[j])
+              doneArrows.push(s.connections[j])
             }
           }
         }
       }
     }
 
-    // let renderer = new DFARenderer()
-    // renderer.render(g, objects)
+    let renderer = new DFARenderer()
+    renderer.render(g, objects)
   }
 
   setEdgePoints (a) {
@@ -119,15 +121,15 @@ export class DFA {
         let done = false
         for (let j = 0; !done && j < 100; j++) {
           let angle = Math.random() * 2 * Math.PI
-          let x = (a.from.x + Math.cos(angle) * this.length).floor()
-          let y = (a.from.y + Math.sin(angle) * this.length).floor()
+          let x = Math.floor(a.from.x + Math.cos(angle) * this.length)
+          let y = Math.floor(a.from.y + Math.sin(angle) * this.length)
           if (x < 0 || y < 0 || x > 1800 || y > 1000 || this.isOverlapping(x, y)) {
             done = false
           } else {
             done = true
             a.to.x = x
             a.to.y = y
-            this.doneObjects.add(a.to)
+            this.doneObjects.push(a.to)
             this.placeConnections(a.to)
           }
         }

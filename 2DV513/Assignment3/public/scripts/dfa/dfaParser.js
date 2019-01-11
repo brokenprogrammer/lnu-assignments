@@ -68,8 +68,8 @@ export class State {
   constructor (name, type) {
     this.x = null
     this.y = null
-    this.width = null
-    this.height = null
+    this.width = 80
+    this.height = 80
     this.connections = []
     this.name = name
     this.type = type
