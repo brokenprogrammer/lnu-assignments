@@ -3,7 +3,6 @@
 // Use the express.Router class to create modular, mountable route handlers.
 let router = require('express').Router()
 let User = require('../models/User.js')
-let Codesnippet = require('../models/Codesnippet.js')
 
 // csurf module to generate csrf tokens for views.
 // According to csurf issues they recommended to move csurf into the routes.
@@ -29,25 +28,45 @@ router.route('/login')
     }
 
     if (request.body.username && request.body.password) {
-      User.authenticate(request.body.username, request.body.password,
-        function (error, user) {
+      response.locals.connection.query(User.findByUsername, request.body.username,
+        function (error, results, fields) {
           if (error) {
-            next(error) // Pass error to express.
-          }
-
-          // If no user was found or password didn't match.
-          if (user === null) {
-            request.session.flash = {
-              type: 'login-failed',
-              message: 'Invalid username or password'
-            }
-
-            return response.status(400).redirect('/login')
+            return next(error)
           } else {
-            request.session.userId = user._id
-            return response.status(200).redirect('/profile')
+            // NOTE: Found a user, now compare the found user password with the request password.
+            if (results.length) {
+              let user = results[0]
+
+              if (user.password === request.body.password) {
+                request.session.userId = user.id
+                return response.status(200).redirect('/profile')
+              } else {
+                // NOTE: Password missmatch
+                request.session.flash = {
+                  type: 'login-failed',
+                  message: 'Invalid username or password'
+                }
+
+                return response.status(400).redirect('/login')
+              }
+            } else {
+              // NOTE: No username matching the specified username
+              request.session.flash = {
+                type: 'login-failed',
+                message: 'Invalid username or password'
+              }
+
+              return response.status(400).redirect('/login')
+            }
           }
         })
+    } else {
+      request.session.flash = {
+        type: 'login-failed',
+        message: 'All fields are required.'
+      }
+
+      return response.status(400).redirect('/login')
     }
   })
 
@@ -94,40 +113,68 @@ router.route('/register')
         password: request.body.password
       }
 
-      // Verify that user with username doesn't exist
-      User.find({ username: request.body.username }).exec(function (error, user) {
-        if (error) {
-          return next(error)
-        } else {
-          if (!user.length) {
-            User.create(data, function (error, user) {
-              if (error) {
-                // If its the password validation error that mongoose throws we handle it manually here.
-                if (error.name === 'ValidationError') {
-                  request.session.flash = {
-                    type: 'register-failed-validation',
-                    message: 'Password must contain atleast 8 characters and one digit.'
-                  }
-
-                  return response.status(400).redirect('/register')
-                } else {
-                  return next(error)
-                }
-              } else {
-                request.session.userId = user._id
-                return response.status(200).redirect('/profile')
-              }
-            })
-          } else {
-            request.session.flash = {
-              type: 'register-failed-userexist',
-              message: 'Username is already taken.'
-            }
-
-            return response.status(400).redirect('/register')
-          }
+      // NOTE: Validation of password containing 6 characters and one number.
+      if (!(request.body.password.length >= 6 && /\d+/.test(request.body.password))) {
+        request.session.flash = {
+          type: 'register-failed-validation',
+          message: 'Password must contain atleast 8 characters and one digit.'
         }
-      })
+
+        return response.status(400).redirect('/register')
+      }
+
+      // Verify that user with username doesn't exist
+      response.locals.connection.query(User.findByUsername, request.body.username,
+        function (error, results, fields) {
+          if (error) {
+            return next(error)
+          } else {
+            if (!results.length) {
+              // TODO: Add verification in User.Create
+              User.create(response.locals.connection, data, function (error, results, fields) {
+                if (error) {
+                  return next(error)
+                } else {
+                  console.log(results)
+                  request.session.userId = results.insertId
+                  return response.status(200).redirect('/profile')
+                }
+              })
+            } else {
+              request.session.flash = {
+                type: 'register-failed-userexist',
+                message: 'Username is already taken.'
+              }
+
+              return response.status(400).redirect('/register')
+            }
+          }
+        })
+
+      // TODO: Remove this mongoose implementation
+      // User.find({ username: request.body.username }).exec(function (error, user) {
+      //   if (error) {
+      //     return next(error)
+      //   } else {
+      //     if (!user.length) {
+      //       User.create(data, function (error, user) {
+      //         if (error) {
+      //           // If its the password validation error that mongoose throws we handle it manually here.
+      //           if (error.name === 'ValidationError') {
+      //             request.session.flash = {
+      //               type: 'register-failed-validation',
+      //               message: 'Password must contain atleast 8 characters and one digit.'
+      //             }
+
+      //             return response.status(400).redirect('/register')
+      //           } else {
+      //             return next(error)
+      //           }
+      //         } else {
+      //           request.session.userId = user._id
+      //           return response.status(200).redirect('/profile')
+      //         }
+      //       })
     } else {
       request.session.flash = {
         type: 'register-failed-invalidinput',
@@ -140,38 +187,43 @@ router.route('/register')
 
 router.route('/profile')
   .get(function (request, response, next) {
-    User.findById(request.session.userId)
-      .exec(function (error, user) {
-        if (error) {
-          return next(error)
-        } else {
-          if (user) {
-            Codesnippet.find({ author: request.session.userId })
-              .exec(function (error, data) {
-                if (error) {
-                  return next(error)
-                }
-
-                let context = {
-                  codesnippets: data.map(function (codesnippet) {
-                    return {
-                      id: codesnippet._id,
-                      code: codesnippet.code,
-                      title: codesnippet.title,
-                      postedAt: codesnippet.postedAt
-                    }
-                  })
-                }
-
-                context.username = user.username
-                response.render('user/profile', context)
-              })
+    if (request.session.userId) {
+      response.locals.connection.query(User.findById, request.session.userId,
+        function (error, results, fields) {
+          if (error) {
+            console.log(error)
+            return next(error)
           } else {
-            // No user session so this page is forbidden.
-            response.status(403).render('error/403')
+            let context = { username: results[0].username }
+            response.render('user/profile', context)
           }
-        }
-      })
+        })
+    } else {
+      // No user session so this page is forbidden.
+      response.status(403).render('error/403')
+    }
+
+    // TODO: Remove this once its translated to sql
+    //         Codesnippet.find({ author: request.session.userId })
+    //           .exec(function (error, data) {
+    //             if (error) {
+    //               return next(error)
+    //             }
+
+    //             let context = {
+    //               codesnippets: data.map(function (codesnippet) {
+    //                 return {
+    //                   id: codesnippet._id,
+    //                   code: codesnippet.code,
+    //                   title: codesnippet.title,
+    //                   postedAt: codesnippet.postedAt
+    //                 }
+    //               })
+    //             }
+
+    //             context.username = user.username
+    //             response.render('user/profile', context)
+    //           })
   })
 
 module.exports = router

@@ -1,27 +1,61 @@
 'use-strict'
 
-let mongoose = require('mongoose')
+let mysql = require('mysql')
 
-function init () {
+function databaseMiddleware (req, res, next) {
   let dbConfig = require('../config/database.js')
-  let db = mongoose.connection
-
-  // TODO: db.on error
-  db.on('error', console.error.bind(console, 'Connection error: '))
-
-  // TODO: db.on open
-  db.once('open', function () {
-    console.log('Connected to database')
+  res.locals.connection = mysql.createConnection({
+    host: dbConfig.host,
+    user: dbConfig.user,
+    password: dbConfig.password,
+    database: dbConfig.database,
+    multipleStatements: true
   })
 
-  process.on('SIGINT', function () {
-    db.close(function () {
-      console.log('Database connection has been terminated.')
-      process.exit(0)
-    })
+  res.locals.connection.connect()
+
+  // Create User table if it doesn't exist.
+  res.locals.connection.query(require('../models/User.js').userTable, function (error, results, fields) {
+    if (error) {
+      console.log(error.message)
+    }
   })
 
-  mongoose.connect(dbConfig.connectionString, { useNewUrlParser: true })
+  // Create Diagrams table if it doesn't exist.
+  res.locals.connection.query(require('../models/diagram.js').diagramTable, function (error, results, fields) {
+    if (error) {
+      console.log(error.message)
+    }
+  })
+
+  // Create ClassDiagrams table if it doesn't exist.
+  res.locals.connection.query(require('../models/diagram.js').classDiagramTable, function (error, results, fields) {
+    if (error) {
+      console.log(error.message)
+    }
+  })
+
+  // Create DFADiagrams table if it doesn't exist.
+  res.locals.connection.query(require('../models/diagram.js').dfaDiagramTable, function (error, results, fields) {
+    if (error) {
+      console.log(error.message)
+    }
+  })
+
+  // let data = {
+  //   type: 'dfa',
+  //   title: 'MyDFA',
+  //   code: 'asduashda',
+  //   author: 1,
+  //   isNFA: true
+  // }
+  // require('../models/diagram.js').create(res.locals.connection, data, function (error, results, fields) {
+  //   if (error) {
+  //     console.log(error.message)
+  //   }
+  // })
+
+  next()
 }
 
-module.exports.init = init
+module.exports.databaseMiddleware = databaseMiddleware
