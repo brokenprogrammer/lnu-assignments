@@ -31,13 +31,28 @@ function create (data, callback) {
   }
 }
 
+function findById (id, callback) {
+  let queryString = `
+    SELECT Diagrams.id, Diagrams.title, Diagrams.code, Diagrams.author, ClassDiagrams.type, DFADiagrams.isNFA
+    FROM Diagrams
+    LEFT JOIN ClassDiagrams ON Diagrams.id = ClassDiagrams.id
+    LEFT JOIN DFADiagrams ON Diagrams.id = DFADiagrams.id
+    WHERE Diagrams.id = ?`
+  db.get(queryString, id, function (error, result) {
+    if (error) {
+      return callback(null)
+    }
+
+    return callback(result)
+  })
+}
+
 function findAll (callback) {
   let queryString = `
     SELECT Diagrams.id, Diagrams.title, Diagrams.code, ClassDiagrams.type, DFADiagrams.isNFA
     FROM Diagrams
     LEFT JOIN ClassDiagrams ON Diagrams.id = ClassDiagrams.id
-    LEFT JOIN DFADiagrams ON Diagrams.id = DFADiagrams.id
-    `
+    LEFT JOIN DFADiagrams ON Diagrams.id = DFADiagrams.id`
   db.all(queryString, callback)
 }
 
@@ -52,9 +67,21 @@ function findAllUserDiagrams (userId, callback) {
   db.all(queryString, userId, callback)
 }
 
+function countUserDiagrams (callback) {
+  let queryString = `
+    SELECT author, COUNT(*) as "Total", COUNT(ClassDiagrams.id) as "ClassDiagrams", COUNT(DFADiagrams.id) as "DFADiagrams", SUM(DFADiagrams.isNFA = 1) as "NFADiagrams"
+    FROM Diagrams
+    LEFT JOIN ClassDiagrams ON Diagrams.id = ClassDiagrams.id
+    LEFT JOIN DFADiagrams ON Diagrams.id = DFADiagrams.id
+    GROUP BY author`
+  db.all(queryString, callback)
+}
+
 module.exports.diagramTable = diagramTable
 module.exports.classDiagramTable = classDiagramTable
 module.exports.dfaDiagramTable = dfaDiagramTable
 module.exports.create = create
+module.exports.findById = findById
 module.exports.findAll = findAll
 module.exports.findAllUserDiagrams = findAllUserDiagrams
+module.exports.countUserDiagrams = countUserDiagrams

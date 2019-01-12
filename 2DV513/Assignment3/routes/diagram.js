@@ -116,4 +116,38 @@ router.route('/diagram/create')
     }
   })
 
+router.route('/diagram/:id')
+  .get(function (request, response, next) {
+    Diagram.findById(request.params.id, function (diagram) {
+      if (diagram !== null) {
+        User.findById(diagram.author, function (username) {
+          if (username !== null) {
+            let context = {
+              single: true,
+              id: diagram.id,
+              code: diagram.code,
+              title: diagram.title,
+              author: username
+            }
+
+            if (request.session.userId) {
+              User.findById(request.session.userId, function (authUser) {
+                if (username !== null) {
+                  context.username = authUser
+                }
+                response.status(200).render('diagram/index', context)
+              })
+            } else {
+              response.status(200).render('diagram/index', context)
+            }
+          } else {
+            response.status(404).render('error/404')
+          }
+        })
+      } else {
+        response.status(404).render('error/404')
+      }
+    })
+  })
+
 module.exports = router

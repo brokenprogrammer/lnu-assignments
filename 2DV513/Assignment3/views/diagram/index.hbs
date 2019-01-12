@@ -17,9 +17,9 @@
         <a class="btn btn-primary" href="/codesnippet/update/{{id}}" role="button">Update</a>
     {{/ifEqual}}
     <pre>
-        <code>
-            {{code}}
-        </code>
+        <textarea class="textArea textarea-code">{{code}}</textarea>
+        <button type="button" class="drawBtn">Draw</button>
+        <canvas class="myCanvas" width="1920" height="1080"></canvas>
     </pre>
     {{/unless}}
 </div>

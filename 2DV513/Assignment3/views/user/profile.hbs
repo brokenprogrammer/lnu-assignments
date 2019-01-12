@@ -1,9 +1,13 @@
 <div class="container">
     <h1 class="mb-5">{{ username }}</h1>
+    <p>This user has a total of {{totalDiagrams}} diagrams of which are 
+        {{classDiagrams}} class diagrams, 
+        {{dfaDiagrams}} DFA diagrams and 
+        {{nfaDiagrams}} NFA diagrams.</p>
     <ul class="list-group">
         {{#each diagrams}}
             <li class="list-group-item">
-                {{title}} - <span>{{type}}</span> 
+                {{title}} - <span>{{type}}</span>
                 <a class="float-right" href="/diagram/{{id}}">View</a>
             </li>
         {{/each}}

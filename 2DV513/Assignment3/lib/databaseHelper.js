@@ -2,7 +2,7 @@
 
 // let mysql = require('mysql')
 let sqlite3 = require('sqlite3').verbose()
-let db = new sqlite3.Database('./db/sampleDB.db')
+let db = new sqlite3.Database('./db/sampleDB1.db')
 
 function init () {
   db.run(require('../models/User.js').userTable)

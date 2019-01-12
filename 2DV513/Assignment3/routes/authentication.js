@@ -183,7 +183,29 @@ router.route('/profile')
                     }
                   }
                 })
-                response.render('user/profile', context)
+
+                Diagram.countUserDiagrams(function (error, rows) {
+                  if (error) {
+                    console.log(error)
+                    return next(error)
+                  }
+
+                  let row = null
+                  for (let i = 0; i < rows.length; ++i) {
+                    if (rows[i].author === request.session.userId) {
+                      row = rows[i]
+                    }
+                  }
+
+                  if (row !== null) {
+                    context.totalDiagrams = row.Total
+                    context.classDiagrams = row.ClassDiagrams
+                    context.dfaDiagrams = row.DFADiagrams - row.NFADiagrams
+                    context.nfaDiagrams = row.NFADiagrams
+                  }
+
+                  response.render('user/profile', context)
+                })
               })
           } else {
             // No user session so this page is forbidden.
