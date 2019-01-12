@@ -2,6 +2,8 @@ import { DFAParser } from './dfa/dfaParser.js'
 import { DFA } from './dfa/dfa.js'
 import { DFAController } from './dfa/dfaController.js'
 import { ClassParser } from './class/classParser.js'
+import { ClassDiagram } from './class/classDiagram.js'
+import { ClassController } from './class/classController.js'
 
 let drawBtn = document.querySelector('.drawBtn')
 let textArea = document.querySelector('.textArea')
@@ -41,6 +43,9 @@ drawBtn.onclick = function () {
   } else if (str.startsWith('<class>')) {
     let parser = new ClassParser()
     objects = parser.parse(str)
-    console.log(objects)
+    let classDiagram = new ClassDiagram()
+    classDiagram.render(g, objects)
+    let controller = new ClassController(canvas, g, objects)
+    controller.listen()
   }
 }

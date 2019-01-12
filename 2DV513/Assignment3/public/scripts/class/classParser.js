@@ -312,11 +312,17 @@ export class Package {
     this.y = 0
     this.width = 0
     this.height = 0
+    this.name = null
   }
 }
 
 export class Class {
   constructor () {
+    this.x = null
+    this.y = null
+    this.width = null
+    this.height = null
+    this.name = null
     this.type = null
     this.inheritances = []
     this.dependencies = []
@@ -331,6 +337,10 @@ export class Class {
 
 export class Association {
   constructor () {
+    this.points = []
+    this.from = null
+    this.to = null
+    this.text = null
     this.fromText = null
     this.toText = null
   }
