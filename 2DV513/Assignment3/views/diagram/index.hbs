@@ -13,8 +13,11 @@
     <h1>{{title}}</h1>
     <p class="lead">{{author}}, <span>{{type}}</span></p>
     {{#ifEqual username author}}
-        <a class="btn btn-danger" href="/codesnippet/delete/{{id}}" role="button">Delete</a>
-        <a class="btn btn-primary" href="/codesnippet/update/{{id}}" role="button">Update</a>
+        <!--
+            NOTE: Theese have not been implemented yet.
+            <a class="btn btn-danger" href="/codesnippet/delete/{{id}}" role="button">Delete</a>
+            <a class="btn btn-primary" href="/codesnippet/update/{{id}}" role="button">Update</a>
+        -->
     {{/ifEqual}}
     <pre>
         <textarea class="textArea textarea-code">{{code}}</textarea>
