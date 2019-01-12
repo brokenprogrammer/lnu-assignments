@@ -1,10 +1,11 @@
 import { DFARenderer } from './dfaRenderer.js'
 
 export class DFA {
-  constructor () {
+  constructor (type) {
     this.doneObjects = []
     this.length = 200
     this.objects = []
+    this.type = type
   }
 
   render (g, objects) {

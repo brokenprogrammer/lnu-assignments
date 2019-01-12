@@ -18,20 +18,25 @@ drawBtn.onclick = function () {
   let newCanvas = canvas.cloneNode(true)
   canvas.parentNode.replaceChild(newCanvas, canvas)
   canvas = newCanvas
+  canvas.oncontextmenu = function (e) {
+    e.preventDefault()
+  }
   g = canvas.getContext('2d')
   let str = textArea.value
 
   // Checks the type of diagram defined in the first line
-  if (str.startsWith('<dfa>')) {
-    console.log('dfa')
+  if (str.startsWith('<dfa>') || str.startsWith('<nfa>')) {
     let parser = new DFAParser()
     objects = parser.parse(str)
-    let dfa = new DFA()
+    let dfa = null
+    if (str.startsWith('<dfa>')) {
+      dfa = new DFA('DFA')
+    } else {
+      dfa = new DFA('NFA')
+    }
     dfa.render(g, objects)
     let controller = new DFAController(canvas, g, objects)
     controller.listen()
-  } else if (str.startsWith('<nfa>')) {
-    console.log('nfa')
   } else if (str.startsWith('<class>')) {
     console.log('class')
   }
