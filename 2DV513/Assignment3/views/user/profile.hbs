@@ -1,10 +1,10 @@
 <div class="container">
     <h1 class="mb-5">{{ username }}</h1>
     <ul class="list-group">
-        {{#each codesnippets}}
+        {{#each diagrams}}
             <li class="list-group-item">
-                {{title}} - <span class="date">{{postedAt}}</span> 
-                <a class="float-right" href="/codesnippet/{{id}}">View</a>
+                {{title}} - <span>{{type}}</span> 
+                <a class="float-right" href="/diagram/{{id}}">View</a>
             </li>
         {{/each}}
     </ul>

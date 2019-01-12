@@ -1,16 +1,39 @@
 'use strict'
 
 // let bcrypt = require('bcrypt')
+let db = require('../lib/databaseHelper').db
 
-let userTable = 'CREATE TABLE IF NOT EXISTS Users (id int PRIMARY KEY AUTO_INCREMENT, username varchar(100) not null, password varchar(100) not null, registeredat timestamp default current_timestamp)'
+let userTable = 'CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY AUTOINCREMENT, username varchar(100) not null, password varchar(100) not null, registeredat timestamp default current_timestamp)'
 
-let findById = 'SELECT * FROM Users WHERE `id`=?'
-let findByUsername = 'SELECT * FROM Users WHERE `username`=?'
+// let findById = 'SELECT * FROM Users WHERE `id`=?'
+// let findByUsername = 'SELECT * FROM Users WHERE `username`=?'
+
+function findByUsername (username, callback) {
+  let sql = 'SELECT * FROM Users WHERE `username`=?'
+  db.get(sql, username, function (error, result) {
+    if (error) {
+      console.log(error)
+      return callback(null)
+    }
+    return callback(result)
+  })
+}
+
+function findById (id, callback) {
+  let sql = 'SELECT * FROM Users WHERE `id`=?'
+  db.get(sql, id, function (error, result) {
+    if (error) {
+      return callback(null)
+    }
+
+    return callback(result.username)
+  })
+}
 
 // TODO: Encryption?
-function create (connection, data, callback) {
+function create (data, callback) {
   let queryString = 'INSERT INTO Users(username, password) VALUES(?, ?)'
-  connection.query(queryString, [data.username, data.password], callback)
+  db.run(queryString, [data.username, data.password], callback)
 }
 
 module.exports.userTable = userTable

@@ -11,7 +11,7 @@ let app = express()
 let port = process.env.PORT || 8000
 
 // Initialize Database.
-// require('./lib/databaseHelper.js').init()
+require('./lib/databaseHelper.js').init()
 
 // Set view engine.
 app.engine('.hbs', exphbs({
@@ -49,15 +49,13 @@ app.use(function (request, response, next) {
   next()
 })
 
-// MySQL middleware
-app.use(require('./lib/databaseHelper.js').databaseMiddleware)
-
 // Set express to look in folder "public" to static resources
 app.use(express.static(path.join(__dirname, 'public'), { index: false }))
 
 // Load routes
 app.use('/', require('./routes/home.js'))
 app.use('/', require('./routes/authentication.js'))
+app.use('/', require('./routes/diagram.js'))
 // app.use('/', require('./routes/codesnippet.js'))
 
 // Set content security policy using helmet
@@ -91,3 +89,8 @@ app.use(function (err, req, res, next) {
 app.listen(port, function () {
   console.log('Express app listening on port %s!', port)
 })
+
+// process.on('exit', function () {
+//   console.log('Closing MySQL connection.')
+//   app.response.locals.connection.end()
+// })

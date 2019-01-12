@@ -3,6 +3,7 @@
 // Use the express.Router class to create modular, mountable route handlers.
 let router = require('express').Router()
 let User = require('../models/User.js')
+let Diagram = require('../models/diagram.js')
 
 // csurf module to generate csrf tokens for views.
 // According to csurf issues they recommended to move csurf into the routes.
@@ -28,29 +29,14 @@ router.route('/login')
     }
 
     if (request.body.username && request.body.password) {
-      response.locals.connection.query(User.findByUsername, request.body.username,
-        function (error, results, fields) {
-          if (error) {
-            return next(error)
-          } else {
-            // NOTE: Found a user, now compare the found user password with the request password.
-            if (results.length) {
-              let user = results[0]
-
-              if (user.password === request.body.password) {
-                request.session.userId = user.id
-                return response.status(200).redirect('/profile')
-              } else {
-                // NOTE: Password missmatch
-                request.session.flash = {
-                  type: 'login-failed',
-                  message: 'Invalid username or password'
-                }
-
-                return response.status(400).redirect('/login')
-              }
+      User.findByUsername(request.body.username,
+        function (user) {
+          if (user !== null) {
+            if (user.password === request.body.password) {
+              request.session.userId = user.id
+              return response.status(200).redirect('/profile')
             } else {
-              // NOTE: No username matching the specified username
+              // NOTE: Password missmatch
               request.session.flash = {
                 type: 'login-failed',
                 message: 'Invalid username or password'
@@ -58,6 +44,14 @@ router.route('/login')
 
               return response.status(400).redirect('/login')
             }
+          } else {
+            // NOTE: No username matching the specified username
+            request.session.flash = {
+              type: 'login-failed',
+              message: 'Invalid username or password'
+            }
+
+            return response.status(400).redirect('/login')
           }
         })
     } else {
@@ -124,57 +118,27 @@ router.route('/register')
       }
 
       // Verify that user with username doesn't exist
-      response.locals.connection.query(User.findByUsername, request.body.username,
-        function (error, results, fields) {
-          if (error) {
-            return next(error)
-          } else {
-            if (!results.length) {
-              // TODO: Add verification in User.Create
-              User.create(response.locals.connection, data, function (error, results, fields) {
-                if (error) {
-                  return next(error)
-                } else {
-                  console.log(results)
-                  request.session.userId = results.insertId
-                  return response.status(200).redirect('/profile')
-                }
-              })
-            } else {
-              request.session.flash = {
-                type: 'register-failed-userexist',
-                message: 'Username is already taken.'
+      User.findByUsername(request.body.username,
+        function (user) {
+          if (user !== null) {
+            User.create(data, function (error, results, fields) {
+              if (error) {
+                return next(error)
+              } else {
+                console.log(this.lastID)
+                request.session.userId = this.lastID
+                return response.status(200).redirect('/profile')
               }
-
-              return response.status(400).redirect('/register')
+            })
+          } else {
+            request.session.flash = {
+              type: 'register-failed-userexist',
+              message: 'Username is already taken.'
             }
+
+            return response.status(400).redirect('/register')
           }
         })
-
-      // TODO: Remove this mongoose implementation
-      // User.find({ username: request.body.username }).exec(function (error, user) {
-      //   if (error) {
-      //     return next(error)
-      //   } else {
-      //     if (!user.length) {
-      //       User.create(data, function (error, user) {
-      //         if (error) {
-      //           // If its the password validation error that mongoose throws we handle it manually here.
-      //           if (error.name === 'ValidationError') {
-      //             request.session.flash = {
-      //               type: 'register-failed-validation',
-      //               message: 'Password must contain atleast 8 characters and one digit.'
-      //             }
-
-      //             return response.status(400).redirect('/register')
-      //           } else {
-      //             return next(error)
-      //           }
-      //         } else {
-      //           request.session.userId = user._id
-      //           return response.status(200).redirect('/profile')
-      //         }
-      //       })
     } else {
       request.session.flash = {
         type: 'register-failed-invalidinput',
@@ -188,14 +152,42 @@ router.route('/register')
 router.route('/profile')
   .get(function (request, response, next) {
     if (request.session.userId) {
-      response.locals.connection.query(User.findById, request.session.userId,
-        function (error, results, fields) {
-          if (error) {
-            console.log(error)
-            return next(error)
+      User.findById(request.session.userId,
+        function (username) {
+          if (username !== null) {
+            let context = { username: username }
+
+            Diagram.findAllUserDiagrams(request.session.userId,
+              function (error, rows) {
+                if (error) {
+                  console.log(error)
+                  return next(error)
+                }
+
+                context.diagrams = rows.map(function (diagram) {
+                  // NOTE: Is an DFA diagram
+                  if (diagram.type === null) {
+                    return {
+                      id: diagram.id,
+                      code: diagram.code,
+                      title: diagram.title,
+                      type: diagram.isNFA ? 'NFA' : 'DFA'
+                    }
+                  } else {
+                    // NOTE: Is a class diagram
+                    return {
+                      id: diagram.id,
+                      code: diagram.code,
+                      title: diagram.title,
+                      type: diagram.type
+                    }
+                  }
+                })
+                response.render('user/profile', context)
+              })
           } else {
-            let context = { username: results[0].username }
-            response.render('user/profile', context)
+            // No user session so this page is forbidden.
+            response.status(403).render('error/403')
           }
         })
     } else {
