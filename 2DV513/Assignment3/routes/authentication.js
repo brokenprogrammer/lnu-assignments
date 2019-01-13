@@ -31,7 +31,7 @@ router.route('/login')
     if (request.body.username && request.body.password) {
       User.findByUsername(request.body.username,
         function (user) {
-          if (user !== null) {
+          if (user !== null && user !== undefined) {
             if (user.password === request.body.password) {
               request.session.userId = user.id
               return response.status(200).redirect('/profile')

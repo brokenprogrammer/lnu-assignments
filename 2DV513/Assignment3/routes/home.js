@@ -9,15 +9,17 @@ router.route('/')
   .get(function (request, response, next) {
     // render the view for the home
     if (request.session.userId) {
-      let username = User.findById(request.session.userId)
-      if (username !== null) {
-        let context = { username: username }
-        response.render('home/index', context)
-      } else {
-        response.render('home/index')
-      }
+      User.findById(request.session.userId, function (username) {
+        if (username !== null) {
+          let context = { username: username }
+          response.render('home/index', context)
+        } else {
+          response.render('home/index')
+        }
+      })
+    } else {
+      response.render('home/index')
     }
-    response.render('home/index')
   })
 
 // Exports
