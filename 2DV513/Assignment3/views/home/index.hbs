@@ -1,15 +1,11 @@
 <div class="container">
   <div class="jumbotron">
     <h1 class="display-4">Welcome!</h1>
-    <p class="lead">This is a website that allows you to share your code snippets.</p>
+    <p class="lead">This is a website that allows you to share your diagrams.</p>
     <hr class="my-4">
     {{#unless username}}
-      <p>To add your own codesnippets you can login <a href="/login">here</a>. If you don't already have an account you can register a new one here for <a href="/register">FREE!</a></p>
+      <p>To add your own diagrams you can login <a href="/login">here</a>. If you don't already have an account you can register a new one here for <a href="/register">FREE!</a></p>
     {{/unless}}
-    <a class="btn btn-primary btn-lg" href="/diagram" role="button">View available codesnippets</a>
+    <a class="btn btn-primary btn-lg" href="/diagram" role="button">View available diagrams</a>
   </div>
 </div>
-
-<textarea class="textArea" rows="20" cols="40"></textarea>
-<button class="drawBtn">Draw</button>
-<canvas class="myCanvas" width="1920" height="1080"></canvas>

@@ -197,6 +197,15 @@ router.route('/profile')
                     }
                   }
 
+                  if (row === null) {
+                    row = {
+                      Total: 0,
+                      ClassDiagrams: 0,
+                      DFADiagrams: 0,
+                      NFADiagrams: 0
+                    }
+                  }
+
                   if (row !== null) {
                     context.totalDiagrams = row.Total
                     context.classDiagrams = row.ClassDiagrams
@@ -216,28 +225,6 @@ router.route('/profile')
       // No user session so this page is forbidden.
       response.status(403).render('error/403')
     }
-
-    // TODO: Remove this once its translated to sql
-    //         Codesnippet.find({ author: request.session.userId })
-    //           .exec(function (error, data) {
-    //             if (error) {
-    //               return next(error)
-    //             }
-
-    //             let context = {
-    //               codesnippets: data.map(function (codesnippet) {
-    //                 return {
-    //                   id: codesnippet._id,
-    //                   code: codesnippet.code,
-    //                   title: codesnippet.title,
-    //                   postedAt: codesnippet.postedAt
-    //                 }
-    //               })
-    //             }
-
-    //             context.username = user.username
-    //             response.render('user/profile', context)
-    //           })
   })
 
 module.exports = router
