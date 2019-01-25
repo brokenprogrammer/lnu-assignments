@@ -157,7 +157,7 @@ You also need to know what subsystem communicates with which other subsystems. T
 This is something you can easily sketch on a whiteboard or use some fancy UML notation. 
 
 Sketch of the system that should be able to share the files:
-TODO: LADDA UPP BILD HÄR
+![Image 1][image11]
 
 Decomposition of functionality:
 1. Identify subsystems and responsibilities
@@ -168,7 +168,7 @@ Decompositions of quality:
 2. Allocate responsibilities to subsystems and interfaces
 
 Depending on what structure you chose in you decomposition you make some concerns more challenging, you amplify some concerns but the goal is to balance the concerns.
-TODO: Ladda upp bild här
+![Image 2][image12]
 
 ### Decision making - Architectural Reasoning
 When we have more than one concern, reasoning about the trade-offs becomes important because if we cannot find the right balance between the concerns
@@ -205,3 +205,6 @@ But its also valid one level up at the organizational level, here we talk about 
 we still have similar problems, similar principles and similar solutions.
 
 ## Lecture 2 - Architecture Documentation
+
+[image11]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture11.png
+[image12]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture12.png
