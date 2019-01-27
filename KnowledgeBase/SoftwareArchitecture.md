@@ -205,6 +205,148 @@ But its also valid one level up at the organizational level, here we talk about 
 we still have similar problems, similar principles and similar solutions.
 
 ## Lecture 2 - Architecture Documentation
+Here we will talk about communication and documentation which is trying to support all different activities that may occurr
+in a system's lifetime. This may be all the different stages from the new product development untill the decommissioning of the system.
+
+The most important thing to communicate with your architecture documentation is the decisions. The architecture level decisions,
+why have we decided to decompose the system in this way, why have we decided to use this authentication mechanism, why did we decide to allocate the
+authentication responsibilities to those specific subsystems and why did we decide to use a specific protocol.
+
+### Documentation
+In the ISO documentation standard displayed last week and we focused on stakeholders and the systme concerns. We can see in the documentation standard that
+the stakeholder has an interest in a system and the association class there is a system concern. Something very important when documenting is WHO you are 
+communicating to. Who is the target of the documentation? 
+
+For the stakeholders and the concerns what should we communicate? We should communicate the results of the design decisions.
+If the stakeholder is directly involved in development, maintenance etc then it is more important that you document the rationale (Why you came up with the decision)
+compared to if you show something to management, they could ask questions why but they are more interested in what.
+
+What is an architectural design decision?
+There is no exact rule here, the problem here is that all designs are hierarcical. Subsystems can contain subsystems and so on so it is difficult to say for example 
+"at this level of abstraction its no longer architecture". 
+
+We will spend more time to think about the impact of the decisions. Are they global or local? If they are global they are considered architectural decisions.
+Architectural design is an intellectual creative process, you as a designer create the system that you envsision, the system that satisfies all the concerns from
+your stakeholders.
+
+As engineers we will gather experiences upon us for example we will work on projects that will fail and perhaps something happened during that project
+that made you think that relational databases are bad. As engineers this is not what we want, we want to stay objective.. Perhaps for the new problem 
+we are trying to solve relational databases are the perfect match.
+
+Example of architectural design decisions:
+* Technology, middle-wares, framework, programming languages
+* Design decomposition(The decomposition of your system into subsystems)
+* Mechanisms that are cross-cutting the subsystems, performance, security, scalability etc.. 
+
+What's important is that we document the decision making not only the decisions themselves.
+
+Some more specific architecture decisions examples but they're not "top-level":
+* How are subsystems distributed, how are they deployed, are they deployed on different machines / servers?
+* Different technology for different subsystems, example different programming languages for different parts of the system.
+
+### Architecture - Complexity Aspirin
+What you see in architecture documentation is primarily two strategies to reduce the complexity. 
+The first one is Abstraction, we have structural and behavioral abstraction which is that we reduce the information to not talk about how subsystems are realised but instead
+about responsibilities for the subsystems and what they provide to the outside. 
+
+If a subsystems is responsible for maintaining information about customers, we do not care if they use a relational database or some other type of technology to make it work.
+We are only interested in an interface that supports us with customer information and not how its stored.
+
+But if we want to have one storage strategy for the entire system then its a decision that we have to make at the top level, because there will be many subsystems that will be affected by
+that decision. So we create an abstraction so we can get rid of the "how", then we can encapsulate and hide information which is nice because the less information we have, the less complex 
+something is to grasp.
+
+### A decision's impact on a system - Locality
+What is the impact of a decision on the system?
+* Global - affects the entire or a large part of a system.
+* Local - affects a single entity or a small parto f a system.
+
+It can be difficult to define when a local decision becomes global and vice versa. 
+
+Example of global (System wide decisions):
+* Implementation technology (Prescribes an architecture structure)
+* Decomposition into components
+* Component organization (Architecture patterns)
+* Principles for quality concerns such as security, authentication, session management, user management
+
+Example of local decisions:
+* Data structures
+* Method implementations (Algorithms)
+* Apply design patterns
+* Apply implementation idioms
+
+### Mary's challenge - Master complexity
+Mary is the architect and she is responsible for taking the system and coming up with a decomposition that reduces the complexity
+so that we can focus on the individual parts.
+
+How does she do that? She can have clients, there can be mobile, other type of clients. There can be a backend with a set of servers or a single server
+that provides some logic for the application and ofcourse there must be some connectivity between the clients and the back-end. 
+
+Her first job here is to think of what functionality we should have within the system. The first step is then to connect which subsystem that will be
+responsible for certain functionality. At the same time she has to consider all the quality requirements such as performance, usability, security etc.
+
+The architects responsibility is to provide the decomposition where responsibilities are allocated to the subsystems. 
+
+### Views and viewpoints - What to do?
+We need to document our architecture, communicate our architecture in different ways.
+If we remember our trio from last lecture, Peter, Paul and Mary.
+Mary she has to communicate it in someway to Peter and in a different way to Paul.
+
+Who are the stakeholders in that example?
+The manager, The architect (Mary) and the programmer. All the three people are stakeholders.
+
+What are the concerns for each of the stakeholders?
+
+Once you know what to communicate and to who you can start thinking about how you should communicate it which in our case as software engineers is models.
+Can be anything from a textual description to an UML model to a formal model etc, Anything that communicates something to the stakeholder.
+
+It is important for every stakeholder that they get something that is tailored for their specific concern and their specific knowledge.
+
+#### Peter - The Programmer
+What is Peter interested in as a programmer?
+He wants to think about how to organize the code, how to use interfaces to interact with components.
+He should also be interested in a test view, for testing a system you need to add monitoring, test drivers, mocks etc. That is something that is 
+complementary to the core functionality of the system but still something that deserves its own models / view.
+
+#### Paul - The Manager
+The manager is interested in the work plan and in work division, economics and quality. 
+So what is the view for the manager? Use cases, a component decomposition where all the individual subsystems are identified.
+A test view, perhaps not the same level as the programmers but since this stakeholder is interested in quality then we might want to create a specific view for that.
+
+The message here is that not everything is architecture but you have to think about the stakeholders and their concerns when deciding if something should be in the documentation
+or not.
+
+#### The users
+They can be interested in the functionality view, the hardware requirements. How the system will be installed (Deployment view), how the system would be maintained and / or
+evolved.
+
+#### Mary's challenge - Architecture Design
+For Mary it is the decomposition but also all the decisions that leads up to all the different Tradeoffs. Her challenge is not to support only one single quality
+but to find a balance between all qualities including functionality in the system which is not a straight forward task.
+It might be the case that you might need to provide views that addresses more than one concern.
+
+Finding a balance between requirements, example Performance and Cost.
+If we're using high-end hardware we might get the performance we are looking for but that comes with a cost. Now if we want to cut down on the costs
+we might cut back on our resources and choose lower end hardware but then performance might become an issue.
+As an engineer we are looking for the "Good enough" to support both cost and performance, balancing the two.
+
+The goal is always to provide something that is maximizing value for **ALL** stakeholders.
+
+### How do I create a view?
+
+1. Look for your stakeholders
+2. Look for their concerns
+3. Make a decision on what models to use in the views.
+
+This is nothing that is carved in stone so if you find out that one stakeholder doesn't understand then you need to add something to make up for it.
+Then it might be that another stakeholder understands but the goal is to communicate with **ALL** stakeholders.
+
+Example views for system functionality:
+* Use case diagram - Stakeholders: Managers
+* Class diagram - Stakeholders: Programmers, Managers(Maybe), Architect, Tester
+* Deployment diagram - Stakeholders: Architect, Testers
+
+## Lecture 3 - ?
 
 [image11]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture11.png
 [image12]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture12.png
