@@ -346,7 +346,83 @@ Example views for system functionality:
 * Class diagram - Stakeholders: Programmers, Managers(Maybe), Architect, Tester
 * Deployment diagram - Stakeholders: Architect, Testers
 
-## Lecture 3 - ?
+## Lecture 3 - Architecture Patterns
+
+We will talk about architecture patterns which is the starting point for the architecture design package. Now we will talk about the process of designing the systems.
+The basic problem is that we have some kind of situation where we have an idea or a vision for a system and that idea consists of some functionality and some quality that
+some users will face. To do that we have some material and tools to do the work and our task is to divise some sort of solution at a high level where we make decisions about the
+systems as a whole and leave the details for later. 
+
+We can return to the house analogy where we have different views for the plumber for the floor plan and the electrician. We can use the same analogy here to explain what we mean by
+this architecture design. If we are going to build a house using a wooden frame or a steel frame thats the material. Based on what type of material you choose you'll have to use a differnt
+set of tools. You also to an extent limit your options as to what you can do. If you choose wood, it will be difficult to build a skyscraper but if you use concrete you can build something that is
+quite high but not as high as if you choose steel. So the same holds for our systems. We also leave the details for later, when we are designing a house we do not need to talk about furniture or 
+wallapapers, we can leave that for later and have an interior designer to deal with that. The same way when we design our systems, if we decompose our systems into subsystems we can have some designers
+that are responsible for designing that component so that component satisfies the interfaces that that interfaces needs to satisfy in terms of functionality and quality.
+
+### Engineering - Architectural Reasoning
+
+When it comes to software design, what we have to deal with then is a set of requirements. A set of requirements that we find in binders with papers or online systems or sticky notes or whatever.
+But our first task is to come up with some decomposition so that the functionality in the system found support where someone is responsible for that part of the system. When we worked on our 
+first level decomposition we used this analytical framework to decide if we were happy with the decomposition and that analytical framework is what separates the engineer and the craftsman. 
+As an engineer your analytical framework consists of more than just knowledge, it can be knowledge of what others have done, reading books and your own experience. When you look at an existing system
+you learn from others. 
+
+Some people have created models that you can use evaluate some property for example performance models. You can use that knowledge of that performance knoweldge and create a candidate architecture
+and evaluate how the architecture compares against the performance model. With this performance model you can predict the performance without spending the time implementing the system then evaluating.
+
+The craftsman would use their previous knowledge but if you use this mathematical performance model you can say something which is not based on previous knowledge. These models are not failsafe, they
+are abstractions based on others experience but often made through multiple individuals knowledge. So what you want to find is balance between formality and usefullness. 
+
+All systems has an architecture, systems that has already been built and systems that are about to be built. That means that we have a lot of knowledge from systems we built but we need 
+to package that knowledge into some reusable format.
+
+### Reuasable Architectural Knowledge
+
+There are three types of architectural knowledge that are reusable. Next lecture we will spend on tactics which are proven solutions to problems like we would like this type of behaviour in our system.
+It is not about functionality but how to achieve quality, there are tactics for detecting if something has failed, tactics for recovering form failiure and many if not all concerns you can imagine.
+
+The focus of todays lecture are patterns which we will get back to.
+
+There is also reference architectures, theese are typically a template for a solution where you see a combination of tactics and patterns in a complete system. For example an architecture for a 
+complete web application stack you can see different patters and tactics which takes the knowledge one step further towards the specific application. 
+
+Patterns are recurring structure or some behaviour that address one or more concerns. This is not something specific for the architecture level but something that we see on all levels. We will focus on software problems which is a general solution to a common problem but it is packaged in a way that its easy to find and also to use. But this is not a tool that fits directly but something you need
+to mold a bit to fit your context. 
+
+Patterns on all levels exists such as design patterns, patterns specific for our implementation but also architecture patterns. Architecture patterns focuses on organizing components in a smart way.
+But even one level up we have patterns to organize your organization.
+
+### Architectural Style or Architecture Pattern?
+
+There is a mix of concepts, before it was called architectural style instead of pattern.
+
+Architectural pattern is a structural organization schema for your software systems. It provides a set of predefined subsystems in terms of responsibility of something and that something
+can be a type of behaviour or a type of connection but its not about how this is achieved. Then there is also guidelines of how to combine theese in a way to achieve what you're looking for.
+However what we will see is that the patterns are not generally applicable but depends on what concern you're interested in. So what you would like to communicate or describe to some extend that decides what pattern we can use and that means that all theese architecture patterns are not always usefull but reusing the same patterns or using the same type of structures with the same type of 
+responsibility with a name will create a language that is very usefull. 
+
+If we say "Client-Server" which is an architectural pattern most would understand the type of system we are about to talk about but if we were to say the "Pipe filter" architectural pattern suddenly
+its not as clear but when you know what pipe filter is then its just as clear as client server. So we will define a design language that architects can use when they are designing the architecture.
+You get a language but you need to combine it with the views because not all patterns are interesting in all views. For example the functionality view for a user, thats not really about architecture itself but the functionality the architecture should provide. But if you start to talk about you getting a client that you can install with this functionality then suddenly it becomes more usefull.
+
+From a documentation perspective this is a language for designers, and this is also recognised in the standard. Architectural patterns is an entity that is recognised as a first class element. You 
+should use patterns when you document your architecture. In a viewpoint there will be a set of patterns provided, specific patterns suitable for that viewpoint. So when you instantiate your 
+architectural view you will instantiate the patterns. 
+
+### Examples of views and patterns from Avgeriou and Zdun
+
+In the greenhouse example we had Mary who had the responsibility of managing the complexity. We also had a developer which also had to manage the complexity but when it comes to the implementation.
+So here we could have two different views, a system view where you manage the complexity and a code view to manage the complexity. One popular way to manage complexity is to layer your architecture.
+Those layers can be logical abstraction but also code organized in layers. Popular today is applications that deal with huge data volumes, so there is streams of data and big chunks of data and they 
+can be deal with them in batches or you can use the pipe and filter architecture, two options and the architecture have to look at them both and figure out for this system which of ones are the best.
+
+More examples could be for example user interraction, how do you organize your architecture to enable our designers to implement certain concerns. Say you have stakeholders that have different 
+interests in which data they are presented with. They would like one of theese nice looking dashboards where they can pick and choose what data to view. Here once again we have different options, model-view-controller, presentation-abstraction-control or c2. Ofcourse when we talk about component interraction which is how we define the communication between the subsystems in our whole system
+then we have many different options such as asynchronous and synchronous, message invocation or an implicit one. We can organize it as a client server or use peer to peer. There is various ways 
+to addressing differnt aspects of how components or subsystems interract. 
+
+With theese patterns with different views, aspects or concerns there is some properties that are enabled by some patterns and some that becomes less enabled. 
 
 [image11]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture11.png
 [image12]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture12.png
