@@ -418,11 +418,47 @@ Those layers can be logical abstraction but also code organized in layers. Popul
 can be deal with them in batches or you can use the pipe and filter architecture, two options and the architecture have to look at them both and figure out for this system which of ones are the best.
 
 More examples could be for example user interraction, how do you organize your architecture to enable our designers to implement certain concerns. Say you have stakeholders that have different 
-interests in which data they are presented with. They would like one of theese nice looking dashboards where they can pick and choose what data to view. Here once again we have different options, model-view-controller, presentation-abstraction-control or c2. Ofcourse when we talk about component interraction which is how we define the communication between the subsystems in our whole system
+interests in which data they are presented with. They would like one of theese nice looking dashboards where they can pick and choose what data to view. Here once again we have different options, 
+model-view-controller, presentation-abstraction-control or c2. Ofcourse when we talk about component interraction which is how we define the communication between the subsystems in our whole system
 then we have many different options such as asynchronous and synchronous, message invocation or an implicit one. We can organize it as a client server or use peer to peer. There is various ways 
 to addressing differnt aspects of how components or subsystems interract. 
 
 With theese patterns with different views, aspects or concerns there is some properties that are enabled by some patterns and some that becomes less enabled. 
+
+### Application of patterns
+
+You should learn the patterns, the upsides the downsides. With that knowledge you can choose the patterns and apply them to your design problem. Like with any other language
+you need to practice, you need to learn from failiures and your success. 
+
+Starting with the quality concern, since thats where it all starts. Looking at the iso standard (ISO9126a - Quality model). Lets focus on the Maintainability box.
+According to this standard Maintainability is about Analyzability, if you need to maintain something you need to understand what it is. Something that is easier to analyze
+is often easier to understand. We also have Changeability, this is a property that explains how difficult it is to make changes to the system. Testability, how easy is it to test. If its easy
+to test its easier to maintain compared to something that its not easy to test.
+
+What you can say from this model you can say that from theese patterns you will find support and how to achieve them. you will also find that some patterns works in the opposite direction.
+So you cannot do architecture design without the full picture of the quality concern. 
+
+Going back to the old greenhouse design challenge, Mary should be managing the complexity of the structure and coming up with a solution that reduces the complexity of the functionality.
+How can you do that? Like mentioned earlier we could use layered systems to manage the complexity. The more detail the more complexity. Layered hierarchies is something that can be used to
+manage complexity by creating abstraction (layers) that hides complexity, it hides HOW certain things are achieved. If you remember that changeability was a key thing in maintainability, so how can we 
+get changeability from this? 
+
+That Maintainability will also give us Portability, if we would like to port a network stack for another stack you need to provide drivers etc to make it work. So if you have maintainability
+because it is kind of easy to change. If someone comes up with an idea that we should move a system from A to B maybe we just have to replace one layer for it to work. 
+
+Advantages of layered systesm are the maintainability, the support for evolution, reuse and standardization. You can get a hardware device from any vendor as long as they provide the device driver
+and you can make it work with you operating system. Downsides, negatives with layered systems could be performance, if you change behaviour you can get a ripple effect down the layers. In general this 
+is the most common model used by modern systems to manage complexity. Its an abstraction that uses other abstractions bellow.
+
+Where can we find where layers are used? JVM, APIs, operating systems.
+
+If we need to talk about reliability, efficiency and portability. What is it that enables all of theese? If a system fails it has to do with reliability and also with efficiency. But what really
+enables all of theese three is component interaction patterns. How you have your subsystems communicate, that is decisive for theese properties. 
+
+Example patterns: Client-server - Explicit invocation. Broker architecture. Peer to peer.
+Client server advantages are that it allows for sharing resources, data and hardware can be shared. Disadvantages are security and requires more resources to implement and support applications.
+
+
 
 [image11]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture11.png
 [image12]: https://github.com/brokenprogrammer/lnu-assignments/blob/master/KnowledgeBase/img/lecture12.png
